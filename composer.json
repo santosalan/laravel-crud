@@ -9,7 +9,6 @@
             "email": "alanssantos@outlook.com"
         }
     ],
-    "minimum-stability": "dev",
     "require": {
         "php": ">=7.0.0",
         "illuminate/contracts": "~5.1",
