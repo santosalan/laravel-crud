@@ -26,10 +26,10 @@
         }
     },
     "extra": {
-      "laravel": {
-          "providers": [
-              "AlanSantos\\LaravelCrud\\ServiceProvider"
-          ]
-      }
-  },
+        "laravel": {
+            "providers": [
+                "AlanSantos\\LaravelCrud\\ServiceProvider"
+            ]
+        }
+    }
 }
