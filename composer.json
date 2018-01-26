@@ -28,7 +28,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "AlanSantos\\LaravelCrud\\ServiceProvider"
+                "SantosAlan\\LaravelCrud\\ServiceProvider"
             ]
         }
     }
