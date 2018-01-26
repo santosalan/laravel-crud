@@ -9,7 +9,7 @@ use Illuminate\Contracts\Container\Container;
 use SantosAlan\LaravelCrud\Console\Commands\CrudMakeCommand;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
-class ServiceProvider extends BaseServiceProviderphp 
+class ServiceProvider extends BaseServiceProvider 
 {
 
     public function boot(Factory $view, Dispatcher $events, Repository $config) 
