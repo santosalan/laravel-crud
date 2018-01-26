@@ -1,0 +1,72 @@
+<?php
+
+namespace {{{namespace}}};
+
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
+
+class {{{singular_uc}}} extends Model
+{
+    use Notifiable;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = '{{{plural}}}';
+
+    /**
+     * The primary key for the model.
+     *
+     * @var string
+     */
+    protected $primaryKey = '{{{primary_key}}}';
+
+    /**
+     * Indicates if the IDs are auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = {{{auto_increment}}};
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        {{{fillable}}}
+    ];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        {{{hidden}}}
+    ];
+
+    /**
+     * The relations to eager load on every query.
+     *
+     * @var array
+     */
+    protected $with = [
+        {{{with}}}
+    ];
+
+    /**
+     * Campos do tipo Date da tabela
+     *
+     * @var array
+     */
+    protected $dates = [
+        {{{dates}}}
+    ];
+
+    {{{belongs_to}}}
+    {{{has_many}}}
+    {{{has_one}}}
+}

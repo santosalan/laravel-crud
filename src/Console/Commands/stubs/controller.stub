@@ -1,0 +1,127 @@
+<?php
+
+namespace App\Http\Controllers;
+
+{{{uses}}}
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+
+class {{{plural_uc}}}Controller extends Controller
+{
+    /**
+     * Get a validator for an incoming registration request.
+     *
+     * @param  array  $data
+     * @return \Illuminate\Contracts\Validation\Validator
+     */
+    protected function validator(array $data)
+    {
+        return Validator::make($data, [
+            {{{validators}}}
+        ]);
+    }
+
+    /**
+     * INDEX - list {{{plural}}}
+     *
+     * @return view {{{plural}}}.index
+     */
+    public function index()
+    {
+        ${{{plural}}} = {{{singular_uc}}}::paginate();
+
+        return view('{{{plural}}}.index', compact('{{{plural}}}'));
+    }
+
+    /**
+     * CREATE - form {{{singular}}}
+     *
+     * @return view {{{plural}}}.form
+     */
+    public function create()
+    {
+        {{{plucks}}}
+
+        return view('{{{plural}}}.form', compact({{{compacts_c}}}));
+    }
+
+    /**
+     * STORE - store {{{singular}}}
+     *
+     * @param  Request $request 
+     * @return redirect {{{plural}}}.create
+     */
+    public function store(Request $request)
+    {
+        ${{{singular}}} = {{{singular_uc}}}::create($request->all());
+
+        $request->session()->flash('msgSuccess', '{{{singular_uc}}} stored!');
+
+        return redirect('{{{plural}}}/create');
+    }
+
+    /**
+     * EDIT - edit {{{singular}}}
+     *
+     * @param  integer $id {{{singular}}}->id
+     * @return view {{{plural}}}.form
+     */
+    public function edit($id)
+    {
+        ${{{singular}}} = {{{singular_uc}}}::findOrFail($id);
+
+        {{{plucks}}}
+
+        return view('{{{plural}}}.form', compact('{{{singular}}}'{{{compacts}}}));
+    }
+
+    /**
+     * UPDATE - update {{{singular}}}
+     *
+     * @param  integer $id      {{{singular}}}->id
+     * @param  Request $request 
+     * @return view             {{{plural}}}.form
+     */
+    public function update($id, Request $request)
+    {
+        ${{{singular}}} = {{{singular_uc}}}::findOrFail($id);
+
+        ${{{singular}}}->update($request->all());
+
+        $request->session()->flash('msgSuccess', '{{{singular_uc}}} updated!');
+
+        {{{plucks}}}
+
+        return view('{{{plural}}}.form', compact('{{{singular}}}'{{{compacts}}}));
+    }
+
+    /**
+     * SHOW - show {{{singular}}}
+     *
+     * @param  integer $id  {{{singular}}}->id
+     * @return view         {{{plural}}}.show
+     */
+    public function show($id)
+    {
+        ${{{singular}}} = {{{singular_uc}}}::findOrFail($id);
+
+        return view('{{{plural}}}.show', compact('{{{singular}}}'));
+    }
+
+    /**
+     * DESTROY - delete {{{singular}}}
+     *
+     * @param  integer $id      {{{singular}}}->id
+     * @return redirect         {{{plural}}}.index
+     */
+    public function destroy($id)
+    {
+        ${{{singular}}} = {{{singular_uc}}}::findOrFail($id);
+
+        ${{{singular}}}->delete();
+
+        $request->session()->flash('msgSuccess', '{{{singular_uc}}} deleted!');
+
+        return redirect('{{{plural}}}');
+    }
+}

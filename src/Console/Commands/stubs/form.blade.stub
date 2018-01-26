@@ -1,0 +1,72 @@
+@extends('adminlte::page')
+
+@section('title', env('APP_NAME') . ' - {{{plural_uc}}}')
+
+@section('css')
+
+    <style>
+        .form-control[required=""] {
+            border-color: #F00;
+        }
+    </style>
+
+@endsection
+
+@section('content_header')
+    
+    <div class="page-header">
+        <h1>{{{plural_uc}}} <small>@if (Request::is('*/create')) Create @else Edit @endif</small></h1>
+        <a href="{{ URL::to('{{{plural}}}') }}" class="btn btn-primary">
+            <i class="fa fa-list"></i> <span class="hidden-xs">List</span>
+        </a>
+    </div>
+
+@endsection
+
+
+@section('content')
+
+    @if (Session::has('msgSuccess'))
+        <div class="alert alert-success" role="alert">{{ Session::get('msgSuccess') }}</div>
+    @elseif (! empty($errors))
+        @foreach ($errors->all() AS $e)
+            <div class="alert alert-error" role="alert">
+                <b>{{ $e }}</b>
+            </div>
+        @endforeach
+    @endif
+
+
+    @if (Request::is('*/create'))
+        <div class="box box-success"> 
+            {{ Form::open(['action' => '{{{plural_uc}}}Controller@store', 'method' => 'POST']) }}
+    @else
+        <div class="box box-warning"> 
+            {{ Form::model(${{{singular}}}, ['action' => ['{{{plural_uc}}}Controller@update', ${{{singular}}}->{{{primary_key}}}], 'method' => 'PATCH']) }}
+    @endif
+            
+
+            <div class="box-body">
+                <div class="form-group">
+                    
+                    {{{form_fields}}}
+                    
+                </div>
+            </div>
+
+            <div class="clearfix"></div>
+            
+            <div class="box-footer">
+                <div class="form-group">
+                    <div class="col-xs-12 text-right"> 
+                        {{ Form::submit('Store', ['class' => 'btn btn-primary form-control']) }}
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-save"></i> Salvar
+                        </button> 
+                    </div>
+                </div>
+            </div>
+
+        {{ Form::close() }}
+    </div>
+@endsection    

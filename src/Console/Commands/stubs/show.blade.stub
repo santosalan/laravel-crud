@@ -1,0 +1,51 @@
+@extends('adminlte::page')
+
+@section('title', env('APP_NAME') . ' - {{{plural_uc}}}')
+
+@section('content_header')
+    
+    <div class="page-header">
+        <h1>{{{plural_uc}}} <small>Show</small></h1>
+
+        <a href="{{ URL::to('{{{plural}}}') }}" class="btn btn-primary">
+            <i class="fa fa-list"></i> <span class="hidden-xs">List</span>
+        </a>
+        <a href="{{ URL::to('{{{plural}}}/create') }}" class="btn btn-success">
+            <i class="fa fa-plus"></i> <span class="hidden-xs">Create</span>
+        </a>
+        <a href="{{ URL::to('{{{plural}}}/' . ${{{singular}}}->id . '/edit') }}" class="btn btn-warning">
+            <i class="fa fa-pencil"></i> <span class="hidden-xs">Edit</span>
+        </a>
+        <a href="javascript:;" class="btn btn-danger btnDelete" data-target="removeItem{{{singular_uc}}}1">
+            <i class="fa fa-remove"></i> <span class="hidden-xs"> Delete</span>
+        </a>
+        <form name="post_5a60fae27298e563991298" style="display:none;" method="post" action="/cgt/usuarios/delete/1"><input name="_method" value="POST" type="hidden"></form>
+        <a href="#" class="hidden removeItem" id="removeItem{{{singular_uc}}}1" onclick="document.post_5a60fae27298e563991298.submit(); event.returnValue = false; return false;"></a>
+    </div>
+        
+    
+@endsection
+
+
+@section('content')
+
+    @if (Session::has('msgSuccess'))
+        <div class="alert alert-success" role="alert">{{ Session::get('msgSucesso') }}</div>
+    @endif
+
+
+    <div class="box box-info"> 
+        <div class="box-header">
+            <h3>{{ {{{display_field}}} }}</h3>
+        </div>
+        <div class="box-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover vertical-table" cellspacing="0" cellpadding="0">
+                    <tbody>
+                        {{{show_fields}}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+@endsection    

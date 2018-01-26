@@ -1,0 +1,82 @@
+@extends('adminlte::page')
+
+@section('title', env('APP_NAME') . ' - {{{plural_uc}}}')
+
+@section('content_header')
+    
+    <div class="page-header">
+        <h1>{{{plural_uc}}}</h1>
+        <a href="{{ URL::to('{{{plural}}}/create') }}" class="btn btn-success">
+            <i class="fa fa-plus"></i> <span class="hidden-xs">Create</span>
+        </a>
+    </div>
+        
+@endsection
+
+@section('content')
+
+    <div class="box box-primary">
+        <div class="box-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover" cellspacing="0" cellpadding="0">
+                    <thead>
+                        <tr>
+                            {{{title_fields}}}
+                            <th class="actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (${{{plural}}} AS ${{{singular}}})
+                            <tr>
+                                {{{value_fields}}}
+                                <td class="actions btn-group-sm">
+                                    {{ link_to('{{{plural}}}/' . ${{{singular}}}->{{{primary_key}}},'', 
+                                                ['class' => 'btn btn-info fa fa-eye',
+                                                 'data-toggle' => 'tooltip', 
+                                                 'data-placement' => 'top', 
+                                                 'title' => 'Show'], 
+                                                false) }}
+
+                                    {{ link_to('{{{plural}}}/' . ${{{singular}}}->{{{primary_key}}} . '/edit','', 
+                                                ['class' => 'btn btn-warning fa fa-pencil',
+                                                 'data-toggle' => 'tooltip', 
+                                                 'data-placement' => 'top', 
+                                                 'title' => 'Edit'], 
+                                                false) }}
+
+                                    {{ link_to('http://javascript:;', '',
+                                                ['class' => 'btn btn-danger fa fa-remove btnDelete',
+                                                 'data-toggle' => 'tooltip', 
+                                                 'data-placement' => 'top', 
+                                                 'title' => 'Delete'], 
+                                                false) }}
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="box-footer text-center">
+            {{ ${{{plural}}}->links() }}
+        </div>
+    </div>
+
+@endsection    
+
+
+@section('js')
+
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        })
+    </script>
+
+@endsection
+
+
+                
+                            
+                        
