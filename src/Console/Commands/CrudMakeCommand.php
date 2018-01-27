@@ -159,13 +159,13 @@ class CrudMakeCommand extends Command
         $tables = DB::select('SHOW TABLES');
 
         foreach ($tables as $t) {
-            if (in_array($t->Tables_in_portal_rh, ['migrations', 'password_resets'])) {
+            if (in_array($t->{'Tables_in_' . env('DB_DATABASE')}, ['migrations', 'password_resets'])) {
                 continue;
             }
 
             // Make the table object
             $objTab = new \stdClass();
-            $objTab->name = $t->Tables_in_portal_rh;
+            $objTab->name = $t->{'Tables_in_' . env('DB_DATABASE')};
             $objTab->singular = Pluralizer::singular($objTab->name);
             $objTab->plural = Pluralizer::plural($objTab->name);
             $objTab->fieldDisplay = false;
