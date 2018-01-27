@@ -108,8 +108,7 @@ class CrudMakeCommand extends Command
                
                 $tableKey = trim($this->option('t')) !== '' ? $this->option('t') : $this->option('table');
                     
-                $table = $this->tables[$tableKey]
-
+                $table = $this->tables[$tableKey];
 
                 $m = [
                     'plural_uc' => ucwords($table->plural),
