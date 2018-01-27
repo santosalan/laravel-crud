@@ -125,7 +125,7 @@ class CrudMakeCommand extends Command
                 
             }   
 
-            $fileWeb = fopen(app_base() . 'routes/web.php', 'a+');
+            $fileWeb = fopen(base_path() . 'routes/web.php', 'a+');
             fwrite($fileWeb, $routes);
             fclose($fileWeb);
         }
