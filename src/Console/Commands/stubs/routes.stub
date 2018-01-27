@@ -3,8 +3,8 @@
  * {{{plural_uc}}}
  */
 Route::get('{{{plural}}}', '{{{plural_uc}}}Controller@index');
-Route::get('{{{plural}}}/{id}', '{{{plural_uc}}}Controller@show');
 Route::get('{{{plural}}}/create', '{{{plural_uc}}}Controller@create');
+Route::get('{{{plural}}}/{id}', '{{{plural_uc}}}Controller@show');
 Route::get('{{{plural}}}/{id}/edit', '{{{plural_uc}}}Controller@edit');
 Route::post('{{{plural}}}/store', '{{{plural_uc}}}Controller@store');
 Route::patch('{{{plural}}}/{id}', '{{{plural_uc}}}Controller@update');
