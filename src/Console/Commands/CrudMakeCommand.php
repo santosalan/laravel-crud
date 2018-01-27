@@ -82,8 +82,8 @@ class CrudMakeCommand extends Command
     {
         if ($this->routes) {
             
-            $template => $this->getTemplate('routes');
-            $routes => '';
+            $template = $this->getTemplate('routes');
+            $routes = '';
 
 
             if (trim($this->option('t')) === 'all' || trim($this->option('table')) === 'all') {
