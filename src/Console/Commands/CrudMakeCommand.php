@@ -623,17 +623,17 @@ class CrudMakeCommand extends Command
                                 foreach ($t->fields as $f) {
                                     if ($f->display) {
                                         $fields .= '
-                                <td>{{ $' . $objTable->singular . '->' . $t->singular . '->' . $f->name . ' }}</td>';
+                                <td>{{ @$' . $objTable->singular . '->' . $t->singular . '->' . $f->name . ' }}</td>';
                                     }
                                 }       
                             }
                         }
                     } elseif ($field->type === 'date') {
                         $fields .= '
-                                <td>{{ $' . $objTable->singular . '->' . $field->name . "->format('d/m/Y') }}</td>";
+                                <td>{{ @$' . $objTable->singular . '->' . $field->name . "->format('d/m/Y') }}</td>";
                     } elseif (in_array($field->type, ['datetime', 'timestamp'])) {
                         $fields .= '
-                                <td>{{ $' . $objTable->singular . '->' . $field->name . "->format('d/m/Y H:i:s') }}</td>";
+                                <td>{{ @$' . $objTable->singular . '->' . $field->name . "->format('d/m/Y H:i:s') }}</td>";
                     } else {
                         $fields .= '
                                 <td>{{ $' . $objTable->singular . '->' . $field->name . ' }}</td>';
@@ -731,7 +731,7 @@ class CrudMakeCommand extends Command
                                         $fields .= '
                         <tr>
                             <th>' . title_case(str_replace('_',' ',$t->singular)) . '</th>
-                            <td>{{ $' . $objTable->singular . '->' . $t->singular . '->' . $f->name . ' }}</td>
+                            <td>{{ @$' . $objTable->singular . '->' . $t->singular . '->' . $f->name . ' }}</td>
                         </tr>';
                                     }
                                 }       
@@ -741,13 +741,13 @@ class CrudMakeCommand extends Command
                         $fields .= '
                         <tr>
                             <th>' . title_case(str_replace('_', ' ', $field->name)) . '</th>
-                            <td>{{ $' . $objTable->singular . '->' . $field->name . "->format('d/m/Y') }}</td>
+                            <td>{{ @$' . $objTable->singular . '->' . $field->name . "->format('d/m/Y') }}</td>
                         </tr>";
                     } elseif (in_array($field->type, ['datetime', 'timestamp'])) {
                         $fields .= '
                         <tr>
                             <th>' . title_case(str_replace('_', ' ', $field->name)) . '</th>
-                            <td>{{ $' . $objTable->singular . '->' . $field->name . "->format('d/m/Y H:i:s') }}</td>
+                            <td>{{ @$' . $objTable->singular . '->' . $field->name . "->format('d/m/Y H:i:s') }}</td>
                         </tr>";
                     } else {
                         $fields .= '
