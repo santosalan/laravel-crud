@@ -20,7 +20,7 @@ class CrudMakeCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'make:crud {--t=} {--table=} {--pm=} {--path-models=}';
+    protected $signature = 'make:crud {--t=} {--table=} {--pm=} {--path-models=}  {--r=} {--routes=}';
 
     /**
      * The console command description.
@@ -35,6 +35,12 @@ class CrudMakeCommand extends Command
      * @var string
      */
     private $pathModels = 'App\\';
+
+    /**
+     * [$routes description]
+     * @var boolean
+     */
+    private $routes = true;
 
     /**
      * [$tables description]
@@ -53,6 +59,79 @@ class CrudMakeCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * [processOptionRoutes description]
+     * @return [type] [description]
+     */
+    public function processOptionRoutes()
+    {
+        $this->alert('ROUTES PROCESS');
+
+        // Verify option TABLE 
+        if (in_array(strtoupper(trim($this->option('r'))), ['N','NO','FALSE']) || in_array(strtoupper(trim($this->option('routes'))), ['N','NO','FALSE'])) {
+            $this->routes = false;
+        }   
+
+    }
+
+    /**
+     * [processRoutes description]
+     * @return [type] [description]
+     */
+    public function processRoutes()
+    {
+        if ($this->routes) {
+            
+            $template => $this->getTemplate('routes');
+            $routes => '';
+
+
+            if (trim($this->option('t')) === 'all' || trim($this->option('table')) === 'all') {
+
+                foreach ($this->tables as $table) {
+                    $m = [
+                        'plural_uc' => ucwords($table->plural),
+                        'plural' => $table->plural,
+                    ];
+
+                    $temp = $template;
+                    
+                    foreach ($this->marks()['routes'] as $mark){
+                        $temp = str_replace('{{{' . $mark . '}}}', trim($m[$mark]), $temp);
+                    }
+                    
+                    $routes .= $temp;
+                }
+                
+            
+            } elseif (trim($this->option('t')) !== '' || trim($this->option('table')) !== '') {
+               
+                $tableKey = trim($this->option('t')) !== '' ? $this->option('t') : $this->option('table');
+                    
+                $table = $this->tables[$tableKey]
+
+
+                $m = [
+                    'plural_uc' => ucwords($table->plural),
+                    'plural' => $table->plural,
+                ];
+
+                $temp = $template;
+                
+                foreach ($this->marks()['routes'] as $mark){
+                    $temp = str_replace('{{{' . $mark . '}}}', trim($m[$mark]), $temp);
+                }
+                
+                $routes = $temp;
+                
+            }   
+
+            $fileWeb = fopen(app_base() . 'routes/web.php', 'a+');
+            fwrite($fileWeb, $routes);
+            fclose($fileWeb);
+        }
+    }
+    
     /**
      * [processOptionPathModels description]
      * @return [type] [description]
@@ -811,10 +890,13 @@ class CrudMakeCommand extends Command
                 'singular_uc',
                 'singular',
                 'display_field',
-                'show_fields'
+                'show_fields',
             ],
 
-
+            'routes' => [
+                'plural_uc',
+                'plural',
+            ],
             
         ];
     }
@@ -907,6 +989,9 @@ class CrudMakeCommand extends Command
     public function handle()
     {
 
+        // Process Routes
+        $this->processOptionRoutes();
+
         // Process Path Models
         $this->processOptionPathModels();
 
@@ -927,6 +1012,9 @@ class CrudMakeCommand extends Command
 
         // Process Show
         $this->processFile('show.blade');
+
+        // Process Routes
+        $this->processRoutes();
 
         
     }
