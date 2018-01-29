@@ -33,7 +33,7 @@
             </button>
             {{ Session::get('msgSuccess') }}
         </div>
-    @elseif (! empty($errors))
+    @elseif (! empty($errors) && count($errors->all()))
         <div class="alert alert-error alert-dismissible" role="alert">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
