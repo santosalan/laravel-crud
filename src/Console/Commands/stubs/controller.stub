@@ -118,9 +118,12 @@ class {{{plural_uc}}}Controller extends Controller
     {
         ${{{singular}}} = {{{singular_uc}}}::findOrFail($id);
 
-        ${{{singular}}}->delete();
-
-        $request->session()->flash('msgSuccess', '{{{singular_uc}}} deleted!');
+        if (${{{singular}}}) {
+            ${{{singular}}}->delete();
+            $request->session()->flash('msgSuccess', '{{{singular_uc}}} deleted!');
+        } else {
+            $request->session()->flash('msgError', '{{{singular_uc}}} not found!');
+        }
 
         return redirect('{{{plural}}}');
     }

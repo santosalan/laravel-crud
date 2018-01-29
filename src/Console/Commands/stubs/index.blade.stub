@@ -15,6 +15,22 @@
 
 @section('content')
 
+    @if (Session::has('msgSuccess'))
+        <div class="alert alert-success alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            {{ Session::get('msgSuccess') }}
+        </div>
+    @elseif (Session::has('msgError'))
+        <div class="alert alert-error alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            {{ Session::get('msgError') }}
+        </div>
+    @endif
+
     <div class="box box-primary">
         <div class="box-body">
             <div class="table-responsive">
@@ -44,12 +60,14 @@
                                                  'title' => 'Edit'], 
                                                 false) }}
 
-                                    {{ link_to('http://javascript:;', '',
-                                                ['class' => 'btn btn-danger fa fa-remove btnDelete',
-                                                 'data-toggle' => 'tooltip', 
-                                                 'data-placement' => 'top', 
-                                                 'title' => 'Delete'], 
-                                                false) }}
+                                    {{ Form::model(${{{singular}}}, 
+                                        ['method' => 'delete', 
+                                         'action' => ['{{{plural_uc}}}Controller@destroy', ${{{singular}}}->id], 
+                                         'class' => 'form-inline form-delete',
+                                         'style' => 'display: inline;']) }}
+                                        {{ Form::hidden('id', ${{{singular}}}->id) }}
+                                        <button class="btn btn-sm btn-danger form-delete" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa fa-remove"></i></button>
+                                    {{ Form::close() }}
                                 </td>
                             </tr>
                         @endforeach
@@ -63,6 +81,25 @@
         </div>
     </div>
 
+
+    <!-- Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h3 class="modal-title" id="myModalLabel"><i class="fa fa-remove fa-3x text-red"></i> Are you sure?</h3>
+          </div>
+          <div class="modal-body">
+            <h4>Once deleted, you will not be able to recover this!</h4>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary delete-btn">Confirm</button>
+          </div>
+        </div>
+      </div>
+    </div>
 @endsection    
 
 
@@ -71,6 +108,15 @@
     <script>
         $(function () {
             $('[data-toggle="tooltip"]').tooltip();
+
+            $('td').on('click', '.form-delete', function(e){
+                e.preventDefault();
+                var $form=$(this);
+                $('#deleteModal').modal({ backdrop: 'static', keyboard: false })
+                    .on('click', '.delete-btn', function(){
+                        $form.submit();
+                    });
+            });
         })
     </script>
 
