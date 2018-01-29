@@ -42,7 +42,7 @@ class {{{plural_uc}}}Controller extends Controller
     {
         {{{plucks}}}
 
-        return view('{{{plural}}}.form', compact({{{compacts_c}}}));
+        return view('{{{plural}}}.form'{{{compacts_c}}});
     }
 
     /**
@@ -114,7 +114,7 @@ class {{{plural_uc}}}Controller extends Controller
      * @param  integer $id      {{{singular}}}->id
      * @return redirect         {{{plural}}}.index
      */
-    public function destroy($id)
+    public function destroy($id, Request $request)
     {
         ${{{singular}}} = {{{singular_uc}}}::findOrFail($id);
 
