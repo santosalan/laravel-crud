@@ -477,7 +477,7 @@ class CrudMakeCommand extends Command
             return $compacts;
         };
         $compacts = $prepareCompacts();
-        $compacts_c = substr($compacts, 1);
+        $compacts_c = empty(trim(substr($compacts, 1))) ? '' : ', compact(' . substr($compacts, 1) . ')';
 
         // PRIMARY KEY
         $preparePrimaryKey = function () use ($objTable) {
