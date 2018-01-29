@@ -621,6 +621,7 @@ class CrudMakeCommand extends Command
                         foreach ($this->tables as $t) {
                             if ($t->name === $field->fk) {
                                 $tmpFields = null;
+
                                 foreach ($t->fields as $f) {
                                     if ($f->display) {
                                         $tmpFields = "
@@ -745,15 +746,38 @@ class CrudMakeCommand extends Command
                     if ($field->fk) {
                         foreach ($this->tables as $t) {
                             if ($t->name === $field->fk) {
+                                $tmpFields = null;
+
                                 foreach ($t->fields as $f) {
                                     if ($f->display) {
-                                        $fields .= '
+                                        $tmpFields = "
                         <tr>
-                            <th>' . title_case(str_replace('_',' ',$t->singular)) . '</th>
-                            <td>{{ @$' . $objTable->singular . '->' . $t->singular . '->' . $f->name . ' }}</td>
-                        </tr>';
+                            <th>" . title_case(str_replace('_',' ',$t->singular)) . "</th>
+                            <td>
+                                @if ($" . $objTable->singular . "->" . $t->singular .") 
+                                    {{ link_to_action('" . ucwords($t->plural) . "Controller@show', $" . $objTable->singular . "->" . $field->name . ", [$" . $objTable->singular . "->" . $field->name . "], ['class' => 'text-primary']) }}
+                                @endif
+                            </td>
+                        </tr>";
+                                        break;
                                     }
                                 }       
+
+                                if ($tmpFields) {
+                                    $fields .= $tmpFields;
+                                } else {
+                                    $fields .= "
+                        <tr>
+                            <th>" . title_case(str_replace('_',' ',$t->singular)) . "</th>
+                            <td>
+                                @if ($" . $objTable->singular . "->" . $t->singular .") 
+                                    {{ link_to_action('" . ucwords($t->plural) . "Controller@show', $" . $objTable->singular . "->" . $field->name . ", [$" . $objTable->singular . "->" . $field->name . "], ['class' => 'text-primary']) }}
+                                @endif
+                            </td>
+                        </tr>";
+                                }
+
+                                break;
                             }
                         }
                     } elseif ($field->type === 'date') {
