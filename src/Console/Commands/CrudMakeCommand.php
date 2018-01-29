@@ -717,7 +717,7 @@ class CrudMakeCommand extends Command
                     @if (Request::is(\'*/create\'))
                     <div class="col-xs-12"> 
                         {{ Form::label("' . $field->name . '", "' . title_case(str_replace('_', ' ', $field->name)) . '", ["class" => "control-label"]) }}
-                        {{ Form::password("' . $field->name . ', ["class" => "form-control", "placeholder" => ""' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
+                        {{ Form::password("' . $field->name . '", ["class" => "form-control", "placeholder" => ""' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
                     </div>
                     @endif' . "\n";
 
