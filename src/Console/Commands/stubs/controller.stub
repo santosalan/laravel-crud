@@ -53,7 +53,7 @@ class {{{plural_uc}}}Controller extends Controller
      */
     public function store(Request $request)
     {
-        ${{{singular}}} = {{{singular_uc}}}::create($request->all());
+        {{{singular_uc}}}::create($request->all());
 
         $request->session()->flash('msgSuccess', '{{{singular_uc}}} stored!');
 

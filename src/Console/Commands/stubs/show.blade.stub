@@ -23,7 +23,7 @@
              'class' => 'form-inline form-delete',
              'style' => 'display: inline;']) }}
             {{ Form::hidden('id', ${{{singular}}}->id) }}
-            <button class="btn btn-sm btn-danger form-delete" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa fa-remove"></i> <span class="hidden-xs"> Delete</span></button>
+            <button class="btn btn-danger form-delete" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa fa-remove"></i> <span class="hidden-xs"> Delete</span></button>
         {{ Form::close() }}
     </div>
         
