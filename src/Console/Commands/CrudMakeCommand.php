@@ -755,7 +755,7 @@ class CrudMakeCommand extends Command
                             <th>" . title_case(str_replace('_',' ',$t->singular)) . "</th>
                             <td>
                                 @if ($" . $objTable->singular . "->" . $t->singular .") 
-                                    {{ link_to_action('" . ucwords($t->plural) . "Controller@show', $" . $objTable->singular . "->" . $field->name . ", [$" . $objTable->singular . "->" . $field->name . "], ['class' => 'text-primary']) }}
+                                    {{ link_to_action('" . ucwords($t->plural) . "Controller@show', $" . $objTable->singular . "->" . $t->singular . '->' . $f->name . ", [$" . $objTable->singular . "->" . $field->name . "], ['class' => 'text-primary']) }}
                                 @endif
                             </td>
                         </tr>";
