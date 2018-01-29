@@ -620,12 +620,29 @@ class CrudMakeCommand extends Command
                     if ($field->fk) {
                         foreach ($this->tables as $t) {
                             if ($t->name === $field->fk) {
+                                $tmpFields = null;
                                 foreach ($t->fields as $f) {
                                     if ($f->display) {
-                                        $fields .= '
-                                <td>{{ @$' . $objTable->singular . '->' . $t->singular . '->' . $f->name . ' }}</td>';
-                                    }
-                                }       
+                                        $tmpFields = '
+                                <td>@if ($' . $objTable->singular . '->' . $t->singular .') 
+                                        {{ @$' . $objTable->singular . '->' . $t->singular . '->' . $f->name . ' }}
+                                    @endif
+                                </td>';
+                                        break;
+                                    } 
+                                }
+
+                                if ($tmpFields) {
+                                    $fields .= $tmpFields;
+                                } else {
+                                    $fields .= '
+                                <td>@if ($' . $objTable->singular . '->' . $t->singular .') 
+                                        {{ $' . $objTable->singular . '->' . $field->name . ' }}
+                                    @endif
+                                </td>';
+                                }
+
+                                break;
                             }
                         }
                     } elseif ($field->type === 'date') {
@@ -691,7 +708,7 @@ class CrudMakeCommand extends Command
                         {{ Form::email("' . $field->name . '", @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
                     </div>' . "\n";
 
-                } elseif ($field->name === 'password') {
+                    } elseif ($field->name === 'password') {
                         $fields .= '
                     <div class="col-xs-12"> 
                         {{ Form::label("' . $field->name . '", "' . title_case(str_replace('_', ' ', $field->name)) . '", ["class" => "control-label"]) }}
