@@ -623,11 +623,12 @@ class CrudMakeCommand extends Command
                                 $tmpFields = null;
                                 foreach ($t->fields as $f) {
                                     if ($f->display) {
-                                        $tmpFields = '
-                                <td>@if ($' . $objTable->singular . '->' . $t->singular .') 
-                                        {{ @$' . $objTable->singular . '->' . $t->singular . '->' . $f->name . ' }}
+                                        $tmpFields = "
+                                <td>
+                                    @if ($" . $objTable->singular . "->" . $t->singular . ") 
+                                        {{ link_to_action('" . ucwords($t->plural) . "Controller@show', $" . $objTable->singular . "->" . $t->singular . '->' . $f->name . ", [$" . $objTable->singular . "->" . $field->name . "], ['class' => 'text-primary']) }}
                                     @endif
-                                </td>';
+                                </td>";
                                         break;
                                     } 
                                 }
@@ -635,11 +636,12 @@ class CrudMakeCommand extends Command
                                 if ($tmpFields) {
                                     $fields .= $tmpFields;
                                 } else {
-                                    $fields .= '
-                                <td>@if ($' . $objTable->singular . '->' . $t->singular .') 
-                                        {{ $' . $objTable->singular . '->' . $field->name . ' }}
+                                    $fields .= "
+                                <td>
+                                    @if ($" . $objTable->singular . "->" . $t->singular .") 
+                                        {{ link_to_action('" . ucwords($t->plural) . "Controller@show', $" . $objTable->singular . "->" . $field->name . ", [$" . $objTable->singular . "->" . $field->name . "], ['class' => 'text-primary']) }}
                                     @endif
-                                </td>';
+                                </td>";
                                 }
 
                                 break;
