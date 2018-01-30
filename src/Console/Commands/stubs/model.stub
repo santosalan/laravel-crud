@@ -67,6 +67,7 @@ class {{{singular_uc}}} extends Model
     ];
 
     {{{belongs_to}}}
-    {{{has_many}}}
     {{{has_one}}}
+    {{{has_many}}}
+    
 }
