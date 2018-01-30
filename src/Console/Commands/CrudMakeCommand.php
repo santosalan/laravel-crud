@@ -166,21 +166,60 @@ class CrudMakeCommand extends Command
             // Make the table object
             $objTab = new \stdClass();
             $objTab->name = $t->{'Tables_in_' . env('DB_DATABASE')};
+            $objTab->relationTable = false;
             $objTab->singular = Pluralizer::singular($objTab->name);
             $objTab->plural = Pluralizer::plural($objTab->name);
             $objTab->fieldDisplay = false;
-            $objTab->fk = 'id_' . $objTab->singular;
+            $objTab->fk = $objTab->singular . '_id';
             $objTab->fields = [];
             $objTab->belongsTo = [];
             $objTab->hasMany = [];
             $objTab->hasOne = [];
+            $objTab->belongsToMany = [];
             $objTab->marks = [];
             $objTab->arqs = [];
 
 
-
-
             array_push($this->tables, $objTab);
+        }
+
+        // Register belongsToMany
+        foreach ($this->tables as $table) {
+            $tabs = explode('_', $table->name);
+
+            if (count($tabs) === 2) {
+                $tab1 = Pluralizer::plural($tabs[0]);
+                $tab2 = Pluralizer::plural($tabs[1]);
+                $rel1 = false;
+                $rel2 = false;
+
+                foreach ($this->tables as $t) {
+                    if ($t->name == $tab1) {
+                        $rel1 = true;
+                    }
+
+                    if ($t->name == $tab2) {
+                        $rel2 = true;
+                    }
+                }    
+
+                if ($rel1 && $rel2) {
+                    foreach ($this->tables as $t) {
+                        if ($t->name == $tab1) {
+                            $t->belongsToMany[$table->name] = $tab2;
+                        }
+
+                        if ($t->name == $tab2) {
+                            $t->belongsToMany[$table->name] = $tab1;
+                        }
+                    }
+
+                    $table->relationTable = true;
+                }
+
+
+            }
+            
         }
 
         //dump($this->tables);
@@ -204,7 +243,7 @@ class CrudMakeCommand extends Command
         foreach ($this->tables as $table) {
             // Register hasMany and hasOne
             foreach ($this->tables as $t) {
-                if ($table->name === $t->name) {
+                if ($table->name === $t->name || $t->relationTable === true) {
                     continue;
                 }
 
@@ -225,16 +264,17 @@ class CrudMakeCommand extends Command
 
 
         // DUMPS
-        /*
-        if (trim($this->option('t')) === 'all' || trim($this->option('table')) === 'all') {
-            dump($this->tables);
-        } elseif (trim($this->option('t')) !== '' || trim($this->option('table')) !== '') {
-            $tableKey = trim($this->option('t')) !== '' ? $this->option('t') : $this->option('table');
-            dump($this->tables[$tableKey]);
-        }
-        */
+        // if (trim($this->option('t')) === 'all' || trim($this->option('table')) === 'all') {
+        //     dd($this->tables);
+            
+        // } elseif (trim($this->option('t')) !== '' || trim($this->option('table')) !== '') {
+        //     $tableKey = trim($this->option('t')) !== '' ? $this->option('t') : $this->option('table');
+        //     dd($this->tables[$tableKey]);
+        // }
+        
 
     }
+
 
     /**
      * [readTable description]
@@ -557,9 +597,11 @@ class CrudMakeCommand extends Command
                     ? $objTable->belongsTo
                     : ($type === 'many' 
                         ? $objTable->hasMany
-                        : $objTable->hasOne);
+                        : ($type === 'one' 
+                            ? $objTable->hasOne
+                            : $objTable->belongsToMany));
 
-            foreach ($attr as $item) {
+            foreach ($attr as $key => $item) {
                 foreach ($this->tables as $t) {
                     if ($t->name !== $item) {
                         continue;
@@ -571,6 +613,8 @@ class CrudMakeCommand extends Command
                         'singular' => $t->singular,
                         'use_model' => $this->pathModels . ucwords($t->singular),
                         'primary_model' => $prepPrimary($t),
+                        'fk_model' => $objTable->fk,
+                        'relation_table' => $key,
                     ];
 
                     $temp = $this->getTemplate($type);
@@ -836,8 +880,7 @@ class CrudMakeCommand extends Command
             'belongs_to' => $prepareSubTemplates('belongs'),
             'has_one' => $prepareSubTemplates('one'),
             'has_many' => $prepareSubTemplates('many'),
-            'belongs_many' => '',
-            //'belongs_many' => $prepareSubTemplates('belongsMany'),
+            'belongs_many' => $prepareSubTemplates('belongsMany'),
 
             // Index
             'title_fields' => $prepareTitleFields(),
@@ -888,8 +931,9 @@ class CrudMakeCommand extends Command
                 'with',
                 'dates',
                 'belongs_to',
-                'has_many',
                 'has_one',
+                'has_many',
+                'belongs_many',
             ],
             
             'belongs' => [
@@ -913,15 +957,16 @@ class CrudMakeCommand extends Command
                 'use_model',
                 'primary_model',
             ],
-            /*
+            
             'belongsMany' => [
                 'plural',
                 'singular_uc',
                 'singular',
                 'use_model',
-                'primary_model',
+                'fk_model',
+                'relation_table',
             ],
-            */
+            
             'index.blade' => [
                 'plural_uc',
                 'plural',
