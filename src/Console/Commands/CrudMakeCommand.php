@@ -278,7 +278,7 @@ class CrudMakeCommand extends Command
         //$this->alert($field->Field);
         preg_match('/[a-zA-Z]+/', $field->Type, $type);
         preg_match('/[0-9]+/', $field->Type, $size);
-        preg_match('/id_([a-zA-Z_0-9]+)/', $field->Field, $fk);
+        preg_match('/([a-zA-Z_0-9]+)_id/', $field->Field, $fk2);
 
 
         $objField->name = $field->Field;
@@ -287,7 +287,7 @@ class CrudMakeCommand extends Command
         $objField->unsigned = strpos($field->Type, 'unsigned') !== false ? true : false;
         $objField->required = $field->Null === 'NO' ? true : false;
         $objField->pk = $field->Key === 'PRI' ? true : false;
-        $objField->fk = !empty($fk) ? Pluralizer::plural($fk[1]) : false;
+        $objField->fk = empty($fk) ? (empty($fk2) ? false : Pluralizer::plural($fk2[1])) : Pluralizer::plural($fk[1]);
         $objField->display = false;
         $objField->unique = $field->Key === 'UNI' ? true : false; 
         $objField->default = $field->Default;
@@ -566,6 +566,7 @@ class CrudMakeCommand extends Command
                     }
 
                     $m = [
+                        'plural' => $t->plural,
                         'singular_uc' => ucwords($t->singular),
                         'singular' => $t->singular,
                         'use_model' => $this->pathModels . ucwords($t->singular),
@@ -833,8 +834,10 @@ class CrudMakeCommand extends Command
             'with' => $prepareWith(),
             'dates' => $prepareDates(),
             'belongs_to' => $prepareSubTemplates('belongs'),
-            'has_many' => $prepareSubTemplates('many'),
             'has_one' => $prepareSubTemplates('one'),
+            'has_many' => $prepareSubTemplates('many'),
+            'belongs_many' => '',
+            //'belongs_many' => $prepareSubTemplates('belongsMany'),
 
             // Index
             'title_fields' => $prepareTitleFields(),
@@ -897,6 +900,7 @@ class CrudMakeCommand extends Command
             ],
 
             'many' => [
+                'plural',
                 'singular_uc',
                 'singular',
                 'use_model',
@@ -909,7 +913,15 @@ class CrudMakeCommand extends Command
                 'use_model',
                 'primary_model',
             ],
-
+            /*
+            'belongsMany' => [
+                'plural',
+                'singular_uc',
+                'singular',
+                'use_model',
+                'primary_model',
+            ],
+            */
             'index.blade' => [
                 'plural_uc',
                 'plural',
