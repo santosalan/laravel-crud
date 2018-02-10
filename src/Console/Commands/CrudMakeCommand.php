@@ -846,6 +846,12 @@ class CrudMakeCommand extends Command
                             <th>' . title_case(str_replace('_', ' ', $field->name)) . '</th>
                             <td>{{ @$' . $objTable->singular . '->' . $field->name . "->format('d/m/Y H:i:s') }}</td>
                         </tr>";
+                    } elseif(in_array($field->name, ['name', 'title', 'user', 'username', 'login', 'email'])) {
+                        $fields .= '
+                        <tr>
+                            <th>trans(\'laravel-crud::view.' . $field->name . '\')</th>
+                            <td>{{ $' . $objTable->singular . '->' . $field->name . ' }}</td>
+                        </tr>';
                     } else {
                         $fields .= '
                         <tr>
