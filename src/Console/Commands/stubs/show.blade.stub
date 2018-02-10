@@ -5,16 +5,16 @@
 @section('content_header')
     
     <div class="page-header">
-        <h1>{{{plural_uc}}} <small>Show</small></h1>
+        <h1>{{{plural_uc}}} <small>{{ trans('laravel-crud::view.show') }}</small></h1>
 
-        <a href="{{ URL::to('{{{plural}}}') }}" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="List">
-            <i class="fa fa-list"></i> <span class="hidden-xs">List</span>
+        <a href="{{ URL::to('{{{plural}}}') }}" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="{{ trans('laravel-crud::view.btn-list') }}">
+            <i class="fa fa-list"></i> <span class="hidden-xs">{{ trans('laravel-crud::view.btn-list') }}</span>
         </a>
-        <a href="{{ URL::to('{{{plural}}}/create') }}" class="btn btn-success" data-toggle="tooltip" data-placement="top" title="Create">
-            <i class="fa fa-plus"></i> <span class="hidden-xs">Create</span>
+        <a href="{{ URL::to('{{{plural}}}/create') }}" class="btn btn-success" data-toggle="tooltip" data-placement="top" title="{{ trans('laravel-crud::view.btn-create') }}">
+            <i class="fa fa-plus"></i> <span class="hidden-xs">{{ trans('laravel-crud::view.btn-create') }}</span>
         </a>
-        <a href="{{ URL::to('{{{plural}}}/' . ${{{singular}}}->id . '/edit') }}" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="Edit">
-            <i class="fa fa-pencil"></i> <span class="hidden-xs">Edit</span>
+        <a href="{{ URL::to('{{{plural}}}/' . ${{{singular}}}->id . '/edit') }}" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="{{ trans('laravel-crud::view.btn-edit') }}">
+            <i class="fa fa-pencil"></i> <span class="hidden-xs">{{ trans('laravel-crud::view.btn-edit') }}</span>
         </a>
         
         {{ Form::model(${{{singular}}}, 
@@ -23,7 +23,9 @@
              'class' => 'form-inline form-delete',
              'style' => 'display: inline;']) }}
             {{ Form::hidden('id', ${{{singular}}}->id) }}
-            <button class="btn btn-danger form-delete" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa fa-remove"></i> <span class="hidden-xs"> Delete</span></button>
+            <button class="btn btn-danger form-delete" data-toggle="tooltip" data-placement="top" title="{{ trans('laravel-crud::view.btn-delete') }}">
+                <i class="fa fa-remove"></i> <span class="hidden-xs">{{ trans('laravel-crud::view.btn-delete') }}</span>
+            </button>
         {{ Form::close() }}
     </div>
         
@@ -74,15 +76,15 @@
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h3 class="modal-title" id="myModalLabel">
                 <i class="fa fa-exclamation fa-2x text-red"></i>  
-                Are you sure?
+                {{ trans('laravel-crud::alert.you-sure') }}
             </h3>
           </div>
           <div class="modal-body">
-            <h4>Once deleted, you will not be able to recover this!</h4>
+            <h4>{{ trans('laravel-crud::alert.once-deleted') }}</h4>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-primary delete-btn">Confirm</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('laravel-crud::view.btn-cancel') }}</button>
+            <button type="button" class="btn btn-primary delete-btn">{{ trans('laravel-crud::view.btn-confirm') }}</button>
           </div>
         </div>
       </div>

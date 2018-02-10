@@ -55,7 +55,10 @@ class {{{plural_uc}}}Controller extends Controller
     {
         {{{singular_uc}}}::create($request->all());
 
-        $request->session()->flash('msgSuccess', '{{{singular_uc}}} stored!');
+        $request->session()->flash(
+            'msgSuccess', 
+            trans('laravel-crud::alert.stored', ['element' => '{{{singular_uc}}}'])
+        );
 
         return redirect('{{{plural}}}/create');
     }
@@ -88,7 +91,10 @@ class {{{plural_uc}}}Controller extends Controller
 
         ${{{singular}}}->update($request->all());
 
-        $request->session()->flash('msgSuccess', '{{{singular_uc}}} updated!');
+        $request->session()->flash(
+            'msgSuccess', 
+            trans('laravel-crud::alert.updated', ['element' => '{{{singular_uc}}}'])
+        );
 
         {{{plucks}}}
 
@@ -101,9 +107,18 @@ class {{{plural_uc}}}Controller extends Controller
      * @param  integer $id  {{{singular}}}->id
      * @return view         {{{plural}}}.show
      */
-    public function show($id)
+    public function show($id, Request $request)
     {
-        ${{{singular}}} = {{{singular_uc}}}::findOrFail($id);
+        ${{{singular}}} = {{{singular_uc}}}::find($id);
+
+        if (!${{{singular}}}) {            
+            $request->session()->flash(
+                'msgError', 
+                trans('laravel-crud::alert.not-found', ['element' => '{{{singular_uc}}}'])
+            );
+
+            return redirect('{{{plural}}}');
+        }
 
         return view('{{{plural}}}.show', compact('{{{singular}}}'));
     }
@@ -116,13 +131,21 @@ class {{{plural_uc}}}Controller extends Controller
      */
     public function destroy($id, Request $request)
     {
-        ${{{singular}}} = {{{singular_uc}}}::findOrFail($id);
+        ${{{singular}}} = {{{singular_uc}}}::find($id);
 
         if (${{{singular}}}) {
             ${{{singular}}}->delete();
-            $request->session()->flash('msgSuccess', '{{{singular_uc}}} deleted!');
+
+            $request->session()->flash(
+                'msgSuccess', 
+                trans('laravel-crud::alert.deleted', ['element' => '{{{singular_uc}}}'])
+            );
+            
         } else {
-            $request->session()->flash('msgError', '{{{singular_uc}}} not found!');
+            $request->session()->flash(
+                'msgError', 
+                trans('laravel-crud::alert.not-found', ['element' => '{{{singular_uc}}}'])
+            );
         }
 
         return redirect('{{{plural}}}');

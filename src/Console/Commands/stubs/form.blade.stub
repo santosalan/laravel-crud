@@ -15,9 +15,9 @@
 @section('content_header')
     
     <div class="page-header">
-        <h1>{{{plural_uc}}} <small>@if (Request::is('*/create')) Create @else Edit @endif</small></h1>
-        <a href="{{ URL::to('{{{plural}}}') }}" class="btn btn-primary">
-            <i class="fa fa-list"></i> <span class="hidden-xs">List</span>
+        <h1>{{{plural_uc}}} <small>@if (Request::is('*/create')) {{ trans('laravel-crud::view.create') }} @else {{ trans('laravel-crud::view.edit') }} @endif</small></h1>
+        <a href="{{ URL::to('{{{plural}}}') }}" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="{{ trans('laravel-crud::view.btn-list') }}">
+            <i class="fa fa-list"></i> <span class="hidden-xs">{{ trans('laravel-crud::view.btn-list') }}</span>
         </a>
     </div>
 
@@ -68,7 +68,7 @@
                 <div class="form-group">
                     <div class="col-xs-12 text-right"> 
                         <button type="submit" class="btn btn-primary">
-                            <i class="fa fa-save"></i> Store
+                            <i class="fa fa-save"></i> {{ trans('laravel-crud::view.btn-save') }}
                         </button> 
                     </div>
                 </div>
@@ -77,3 +77,14 @@
         {{ Form::close() }}
     </div>
 @endsection    
+
+
+@section('js')
+
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        })
+    </script>
+
+@endsection

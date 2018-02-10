@@ -14,15 +14,30 @@ class ServiceProvider extends BaseServiceProvider
 
     public function boot(Factory $view, Dispatcher $events, Repository $config) 
     {     
-        $this->registerCommands();
+        $this->loadTranslations();
 
+        $this->registerCommands();
+    }
+
+    private function loadTranslations()
+    {
+        $translationsPath = $this->packagePath('resources/lang');
+
+        $this->loadTranslationsFrom($translationsPath, 'laravel-crud');
+
+        $this->publishes([
+            $translationsPath => resource_path('lang/vendor/laravel-crud'),
+        ], 'translations');
+    }
+
+    private function packagePath($path)
+    {
+        return __DIR__."/../$path";
     }
 
     private function registerCommands()
     {
-       
         $this->commands(CrudMakeCommand::class);
-       
     }
 
 }

@@ -752,8 +752,8 @@ class CrudMakeCommand extends Command
                     } elseif ($field->name === 'email') {
                         $fields .= '
                     <div class="col-xs-12"> 
-                        {{ Form::label("' . $field->name . '", "' . title_case(str_replace('_', ' ', $field->name)) . '", ["class" => "control-label"]) }}
-                        {{ Form::email("' . $field->name . '", @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
+                        {{ Form::label("' . $field->name . '", trans(\'laravel-crud::view.email\'), ["class" => "control-label"]) }}
+                        {{ Form::email("' . $field->name . '", @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => trans(\'laravel-crud::view.email\')' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
                     </div>' . "\n";
 
                     } elseif ($field->name === 'password') {
@@ -761,11 +761,17 @@ class CrudMakeCommand extends Command
                         $fields .= '
                     @if (Request::is(\'*/create\'))
                     <div class="col-xs-12"> 
-                        {{ Form::label("' . $field->name . '", "' . title_case(str_replace('_', ' ', $field->name)) . '", ["class" => "control-label"]) }}
-                        {{ Form::password("' . $field->name . '", ["class" => "form-control", "placeholder" => ""' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
+                        {{ Form::label("' . $field->name . '", trans(\'laravel-crud::view.password\'), ["class" => "control-label"]) }}
+                        {{ Form::password("' . $field->name . '", ["class" => "form-control", "placeholder" => trans(\'laravel-crud::view.password\')' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
                     </div>
                     @endif' . "\n";
 
+                    } elseif (in_array($field->name, ['name', 'title', 'user', 'username', 'login'])) {
+                        $fields .= '
+                    <div class="col-xs-12"> 
+                        {{ Form::label("' . $field->name . '", trans(\'laravel-crud::view.' . $field->name . '\'), ["class" => "control-label"]) }}
+                        {{ Form::text("' . $field->name . '", @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => trans(\'laravel-crud::view.' . $field->name . '\')' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
+                    </div>' . "\n";
                     } else {
                         $fields .= '
                     <div class="col-xs-12"> 
@@ -935,6 +941,24 @@ class CrudMakeCommand extends Command
                 'has_many',
                 'belongs_many',
             ],
+
+            'pivot' => [
+                'plural_uc',
+                'plural',
+                'singular_uc',
+                'singular',
+                'namespace',
+                'primary_key',
+                'auto_increment',
+                'fillable',
+                'hidden',
+                'with',
+                'dates',
+                'belongs_to',
+                'has_one',
+                'has_many',
+                'belongs_many',
+            ],
             
             'belongs' => [
                 'singular_uc',
@@ -1012,6 +1036,13 @@ class CrudMakeCommand extends Command
     {
         $this->alert(strtoupper($type) . ' PROCESS');
         foreach ($this->tables as $key => $table) {
+            if ($table->relationTable === true && $type !== 'pivot') {
+                continue;
+            }
+
+            if ($table->relationTable !== true && $type === 'pivot') {
+                continue;
+            }            
 
             if (trim($this->option('t')) !== 'all' && trim($this->option('table')) !== 'all') {
                 $tableKey = trim($this->option('t')) !== '' ? $this->option('t') : $this->option('table');
@@ -1100,10 +1131,10 @@ class CrudMakeCommand extends Command
         // Process TABLES
         $this->processOptionTable();
         
-        // Process File
+        // Process Controller
         $this->processFile('controller');
 
-        // Process File
+        // Process Model
         $this->processFile('model');
 
         // Process Show
