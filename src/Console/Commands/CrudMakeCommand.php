@@ -645,6 +645,9 @@ class CrudMakeCommand extends Command
                             <th>' . title_case(str_replace('_',' ',$t->singular)) . '</th>';
                             }
                         }
+                    } elseif (in_array($field->name, ['name', 'title', 'user', 'username', 'login', 'email', 'created_at', 'updated_at'])) {
+                        $fields .= '
+                            <th>{{ trans(\'laravel-crud::view.' . str_replace('_', '-', $field->name) . '\') }}</th>';    
                     } else {
                         $fields .= '
                             <th>' . title_case(str_replace('_', ' ', $field->name)) . '</th>';
@@ -834,6 +837,12 @@ class CrudMakeCommand extends Command
                                 break;
                             }
                         }
+                    } elseif(in_array($field->name, ['created_at', 'updated_at'])) {
+                        $fields .= '
+                        <tr>
+                            <th>{{ trans(\'laravel-crud::view.' . str_replace('_', '-', $field->name) . '\') }}</th>
+                            <td>{{ @$' . $objTable->singular . '->' . $field->name . "->format('d/m/Y H:i:s') }}</td>
+                        </tr>";
                     } elseif ($field->type === 'date') {
                         $fields .= '
                         <tr>
@@ -849,7 +858,7 @@ class CrudMakeCommand extends Command
                     } elseif(in_array($field->name, ['name', 'title', 'user', 'username', 'login', 'email'])) {
                         $fields .= '
                         <tr>
-                            <th>trans(\'laravel-crud::view.' . $field->name . '\')</th>
+                            <th>{{ trans(\'laravel-crud::view.' . $field->name . '\') }}</th>
                             <td>{{ $' . $objTable->singular . '->' . $field->name . ' }}</td>
                         </tr>';
                     } else {
