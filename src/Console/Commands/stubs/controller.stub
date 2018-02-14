@@ -69,9 +69,18 @@ class {{{plural_uc}}}Controller extends Controller
      * @param  integer $id {{{singular}}}->id
      * @return view {{{plural}}}.form
      */
-    public function edit($id)
+    public function edit($id, Request $request)
     {
-        ${{{singular}}} = {{{singular_uc}}}::findOrFail($id);
+        ${{{singular}}} = {{{singular_uc}}}::find($id);
+
+        if (!${{{singular}}}) {            
+            $request->session()->flash(
+                'msgError', 
+                trans('laravel-crud::alert.not-found', ['element' => '{{{singular_uc}}}'])
+            );
+
+            return redirect('{{{plural}}}');
+        }
 
         {{{plucks}}}
 
@@ -96,9 +105,7 @@ class {{{plural_uc}}}Controller extends Controller
             trans('laravel-crud::alert.updated', ['element' => '{{{singular_uc}}}'])
         );
 
-        {{{plucks}}}
-
-        return view('{{{plural}}}.form', compact('{{{singular}}}'{{{compacts}}}));
+        return redirect('{{{plural}}}');
     }
 
     /**
