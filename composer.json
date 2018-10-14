@@ -1,7 +1,7 @@
 {
     "name": "santosalan/laravel-crud",
     "description": "Generate Laravel CRUD",
-    "keywords": ["laravel", "crud", "admin", "administrator", "adminlte", "santosalan"],
+    "keywords": ["laravel", "crud", "api-client", "api", "client", "admin", "administrator", "adminlte", "santosalan"],
     "license": "MIT",
     "authors": [
         {
