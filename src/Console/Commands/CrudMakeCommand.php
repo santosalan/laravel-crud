@@ -702,7 +702,7 @@ class CrudMakeCommand extends Command
             $fillable = null;
 
             foreach ($objTable->fields as $f) {
-                if (in_array(strtolower($f->name), ['id', 'created_at', 'updated_at', 'deleted_at'])) {
+                if (!$this->apiLumen && in_array(strtolower($f->name), ['id', 'created_at', 'updated_at', 'deleted_at'])) {
                     continue;
                 }
 
