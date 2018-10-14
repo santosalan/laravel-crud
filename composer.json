@@ -19,7 +19,7 @@
         "laravelcollective/html": "^5.4.0",
         "laravel/framework": "^5.4",
         "jeroennoten/laravel-adminlte": "^1.22",
-        "santosalan/api-magic" : "^0.0.4",
+        "santosalan/api-magic" : "^0.0.4"
     },
     "autoload": {
         "psr-4": {
