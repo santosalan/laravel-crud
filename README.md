@@ -27,6 +27,9 @@ or
 > php artisan vendor:publish --provider 'SantosAlan\LaravelCrud\ServiceProvider'
 
 
+## Configure the app/Services/CoreApiService.php with data of the system core Lumen CRUD Server
+
+
 **Caution: All files will be replaced**
     
 
