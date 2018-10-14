@@ -16,6 +16,8 @@ class ServiceProvider extends BaseServiceProvider
     {     
         $this->loadTranslations();
 
+        $this->publishServices();
+
         $this->registerCommands();
     }
 
@@ -28,6 +30,15 @@ class ServiceProvider extends BaseServiceProvider
         $this->publishes([
             $translationsPath => resource_path('lang/vendor/laravel-crud'),
         ], 'translations');
+    }
+
+    private function publishServices()
+    {
+        $servicesPath = $this->packagePath('app/Services');
+
+        $this->publishes([
+            $servicesPath => app_path('Services'),
+        ], 'services');
     }
 
     private function packagePath($path)

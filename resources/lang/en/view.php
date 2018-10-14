@@ -17,6 +17,7 @@ return [
     'email'                         => 'Email',
     'created-at'                    => 'Created at',
     'updated-at'                    => 'Updated at',
+    'deleted-at'                    => 'Deleted at',
     'actions'                       => 'Actions',
 
 
@@ -34,4 +35,10 @@ return [
     'btn-back'                      => 'Back',
     'btn-previous'                  => 'Previous',
     'btn-next'                      => 'Next',
+    'btn-refresh'                   => 'Refresh',
+    'btn-clear'                     => 'Clear',
+    'btn-filter'                    => 'Filter',
+    'btn-search'                    => 'Search',
+    'btn-find'                      => 'Find',
+    'btn-validate'                  => 'Validate',
 ];

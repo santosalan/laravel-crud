@@ -20,7 +20,11 @@ class CrudMakeCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'make:crud {--t=} {--table=} {--pm=} {--path-models=}  {--r=} {--routes=}';
+    protected $signature = 'make:crud 
+                            {--t|table= : [all | table number] }
+                            {--p|path-models=App : Namespace to Models (Directories will be created) }  
+                            {--r|routes=Y : [Y | N] }
+                            {--a|api-client=N : [Y | N] (Api client to System Core generated with santosalan/lumen-crud})';   
 
     /**
      * The console command description.
@@ -41,6 +45,12 @@ class CrudMakeCommand extends Command
      * @var boolean
      */
     private $routes = true;
+
+    /**
+     * [$apiLumen description]
+     * @var boolean
+     */
+    private $apiLumen = false;
 
     /**
      * [$tables description]
@@ -67,8 +77,8 @@ class CrudMakeCommand extends Command
     {
         $this->alert('ROUTES PROCESS');
 
-        // Verify option TABLE 
-        if (in_array(strtoupper(trim($this->option('r'))), ['N','NO','FALSE']) || in_array(strtoupper(trim($this->option('routes'))), ['N','NO','FALSE'])) {
+        // Verify option ROUTES 
+        if (in_array(strtoupper(trim($this->option('routes'))), ['N','NO','FALSE'])) {
             $this->routes = false;
         }   
 
@@ -86,7 +96,7 @@ class CrudMakeCommand extends Command
             $routes = '';
 
 
-            if (trim($this->option('t')) === 'all' || trim($this->option('table')) === 'all') {
+            if (trim($this->option('table')) === 'all') {
 
                 foreach ($this->tables as $table) {
                     $m = [
@@ -104,9 +114,9 @@ class CrudMakeCommand extends Command
                 }
                 
             
-            } elseif (trim($this->option('t')) !== '' || trim($this->option('table')) !== '') {
+            } elseif (trim($this->option('table')) !== '') {
                
-                $tableKey = trim($this->option('t')) !== '' ? $this->option('t') : $this->option('table');
+                $tableKey = $this->option('table');
                     
                 $table = $this->tables[$tableKey];
 
@@ -140,8 +150,8 @@ class CrudMakeCommand extends Command
         $this->alert('PATH MODELS PROCESS');
 
         // Verify option TABLE 
-        if (trim($this->option('pm')) !== '' || trim($this->option('path-models')) !== '') {
-            $this->pathModels = trim($this->option('pm')) !== '' ? str_finish($this->option('pm'), '\\') : str_finish($this->option('path-models'), '\\');
+        if (trim($this->option('path-models')) !== '') {
+            $this->pathModels = str_finish($this->option('path-models'), '\\');
         }   
 
     }
@@ -226,7 +236,7 @@ class CrudMakeCommand extends Command
 
 
         // Verify option TABLE 
-        if (trim($this->option('t')) === '' && trim($this->option('table')) === '') {
+        if (trim($this->option('table')) === '') {
             
             $this->alert('TABLES');
             foreach ($this->tables as $tableKey => $table) {
@@ -264,14 +274,29 @@ class CrudMakeCommand extends Command
 
 
         // DUMPS
-        // if (trim($this->option('t')) === 'all' || trim($this->option('table')) === 'all') {
+        // if (trim($this->option('table')) === 'all') {
         //     dd($this->tables);
             
-        // } elseif (trim($this->option('t')) !== '' || trim($this->option('table')) !== '') {
-        //     $tableKey = trim($this->option('t')) !== '' ? $this->option('t') : $this->option('table');
+        // } elseif (trim($this->option('table')) !== '') {
+        //     $tableKey = $this->option('table');
         //     dd($this->tables[$tableKey]);
         // }
         
+
+    }
+
+    /**
+     * [processOptionApiClient description]
+     * @return [type] [description]
+     */
+    public function processOptionApiClient()
+    {
+        $this->alert('API CLIENT PROCESS');
+
+        // Verify option TABLE 
+        if (!in_array(strtoupper(trim($this->option('api-client'))), ['N','NO','FALSE'])) {
+            $this->apiLumen = true;
+        }
 
     }
 
@@ -333,6 +358,8 @@ class CrudMakeCommand extends Command
         $objField->default = $field->Default;
         $objField->autoIncrement = strpos($field->Extra, 'auto_increment') !== false ? true : false;
         $objField->validator = $this->generateValidator($objField, $table);
+        $objField->filter_set = $this->generateFilterSet($objField);
+        $objField->filter = $this->generateFilter($objField);
 
 
         $displays = [
@@ -397,14 +424,112 @@ class CrudMakeCommand extends Command
     }
 
     /**
+     * [generateFilterSet description]
+     * @return [type] [description]
+     */
+    public function generateFilterSet($objField)
+    {
+        
+        // Get Field Type
+        $funcType = function () use ($objField) {        
+
+            switch ($objField->type) {
+                case 'int': 
+                    $type = 'integer';
+                    break;
+
+                case 'char':
+                case 'varchar':
+                case 'text':
+                    $type = 'string';
+                    break;
+
+                default:
+                    $type = $objField->type;
+            }
+
+            return $type;
+        };
+        
+        // $this->info($objField->name . ' -> ' . $funcType());
+
+        switch ($funcType()) {
+            case 'date': 
+            case 'datetime':
+            case 'time':
+            case 'timestamp':
+                    $filter = "@\$r['" . $objField->name . "'] ? \$r['" . $objField->name . "'] : null";
+                    break;
+
+            default:
+                    $filter = "\$r['" . $objField->name . "']";
+                    break;
+        }
+        
+        return $filter;
+        
+    }
+
+    /**
+     * [generateFilter description]
+     * @return [type] [description]
+     */
+    public function generateFilter($objField)
+    {
+        
+        // Get Field Type
+        $funcType = function () use ($objField) {        
+
+            switch ($objField->type) {
+                case 'int': 
+                    $type = 'integer';
+                    break;
+
+                case 'char':
+                case 'varchar':
+                case 'text':
+                    $type = 'string';
+                    break;
+
+                default:
+                    $type = $objField->type;
+            }
+
+            return $type;
+        };
+        
+        $filter = "isset(\$filter['" . $objField->name . "'])";
+        switch ($funcType()) {
+            case 'string': 
+                    $filter .= " ? '%' . \$filter['" . $objField->name . "'] . '%' : null";
+                    break;
+
+            case 'integer':
+                    $filter .= " ? \$filter['" . $objField->name . "'] : null";
+                    break;
+
+            default:
+                    $filter .= " ? \$filter['" . $objField->name . "'] : null";
+                    break;
+        }
+        
+        return $filter;
+        
+    }
+
+    /**
      * getTemplate
      *
      * @param  [type] $type [description]
      * @return string      [description]
      */
     public function getTemplate($type)
-    {        
-        $template = file_get_contents(__DIR__ . '/stubs/' . $type . '.stub');
+    {   
+        if ($this->apiLumen) {
+            $template = file_get_contents(__DIR__ . '/stubs/api/' . $type . '.stub');
+        } else {
+            $template = file_get_contents(__DIR__ . '/stubs/' . $type . '.stub');
+        }
 
         if ($template === false) {
             $this->error('CRUD Template [' . $type  . '] not found.');
@@ -466,7 +591,7 @@ class CrudMakeCommand extends Command
         $prepareValidators = function () use ($objTable) {
             $validators = '';
             foreach ($objTable->fields as $f) {
-                if (in_array($f->name, ['id', 'created_at', 'updated_at', 'remember_token'])){
+                if (in_array($f->name, ['id', 'created_at', 'updated_at', 'deleted_at', 'remember_token'])){
                     continue;
                 }
 
@@ -478,6 +603,42 @@ class CrudMakeCommand extends Command
             }
 
             return $validators;
+        };
+
+        // FILTERS SET
+        $prepareFiltersSet = function () use ($objTable) {
+            $filters = '';
+            foreach ($objTable->fields as $f) {
+                if (in_array($f->name, ['id', 'password', 'token', 'token_request', 'token_response', 'remember_token'])){
+                    continue;
+                }
+
+                if (empty($filters)) {
+                    $filters = "'" . $f->name . "' => " . $f->filter_set . ",\n";
+                } else {
+                    $filters .= "                '" . $f->name . "' => " . $f->filter_set . ",\n";
+                }
+            }
+
+            return $filters;
+        };
+
+        // FILTERS
+        $prepareFilters = function () use ($objTable) {
+            $filters = '';
+            foreach ($objTable->fields as $f) {
+                if (in_array($f->name, ['id', 'password', 'token', 'token_request', 'token_response', 'remember_token'])){
+                    continue;
+                }
+
+                if (empty($filters)) {
+                    $filters = "'" . $f->name . "' => " . $f->filter . ",\n";
+                } else {
+                    $filters .= "            '" . $f->name . "' => " . $f->filter . ",\n";
+                }
+            }
+
+            return $filters;
         };
 
         // PLUCKS
@@ -541,7 +702,7 @@ class CrudMakeCommand extends Command
             $fillable = null;
 
             foreach ($objTable->fields as $f) {
-                if (in_array(strtolower($f->name), ['id', 'created_at', 'updated_at'])) {
+                if (in_array(strtolower($f->name), ['id', 'created_at', 'updated_at', 'deleted_at'])) {
                     continue;
                 }
 
@@ -567,7 +728,7 @@ class CrudMakeCommand extends Command
             $dates = null;
 
             foreach ($objTable->fields as $f) {
-                if (in_array($f->name, ['created_at', 'updated_at'])) {
+                if (in_array($f->name, ['created_at', 'updated_at', 'deleted_at'])) {
                     continue;
                 }
 
@@ -631,6 +792,64 @@ class CrudMakeCommand extends Command
             return $subTemp;
         };
 
+        // FILTERS FIELDS
+        $prepareFiltersFields = function () use ($objTable) {
+            $fields = null;
+
+            foreach ($objTable->fields as $field) {
+                if (! in_array($field->name, ['id', 'password', 'token', 'token_request', 'token_response', 'remember_token'])) {
+
+                    if ($field->fk) {
+                        foreach ($this->tables as $t) {
+                            if ($t->name === $field->fk) {
+                                $fields .= '
+                <div class="col-xs-12 col-sm-6 col-md-4"> 
+                    {{ Form::label("' . $field->name . '", "' . title_case(str_replace('_',' ',$t->singular)) . '", ["class" => "control-label"]) }}
+                    {{ Form::select("' . $field->name . '", $' . $t->plural . ', @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ']) }}
+                </div>' . "\n";
+                                
+                            }
+                        }
+                    } elseif (in_array($field->type, ['date', 'datetime', 'timestamp'])) {
+                        $fields .= '
+                <div class="col-xs-12 col-sm-6 col-md-4">
+                    {{ Form::label("' . $field->name . '", "' . title_case(str_replace('_', ' ', $field->name)) . '", ["class" => "control-label"]) }}
+                    {{ Form::date("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
+                </div>' . "\n";
+
+                    } elseif ($field->type === 'int') {
+                        $fields .= '
+                <div class="col-xs-12 col-sm-6 col-md-4">
+                    {{ Form::label("' . $field->name . '", "' . title_case(str_replace('_', ' ', $field->name)) . '", ["class" => "control-label"]) }}
+                    {{ Form::number("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
+                </div>' . "\n";
+
+                    } elseif ($field->name === 'email') {
+                        $fields .= '
+                <div class="col-xs-12 col-sm-6 col-md-4">
+                    {{ Form::label("' . $field->name . '", trans(\'laravel-crud::view.email\'), ["class" => "control-label"]) }}
+                    {{ Form::email("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => trans(\'laravel-crud::view.email\')' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
+                </div>' . "\n";
+
+                    } elseif (in_array($field->name, ['name', 'title', 'user', 'username', 'login'])) {
+                        $fields .= '
+                <div class="col-xs-12 col-sm-6 col-md-4">
+                    {{ Form::label("' . $field->name . '", trans(\'laravel-crud::view.' . $field->name . '\'), ["class" => "control-label"]) }}
+                    {{ Form::text("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => trans(\'laravel-crud::view.' . $field->name . '\')' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
+                </div>' . "\n";
+                    } else {
+                        $fields .= '
+                <div class="col-xs-12 col-sm-6 col-md-4">
+                    {{ Form::label("' . $field->name . '", "' . title_case(str_replace('_', ' ', $field->name)) . '", ["class" => "control-label"]) }}
+                    {{ Form::text("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
+                </div>' . "\n";
+                    }
+                }
+            }
+
+            return $fields;
+        };
+
         // TITLE FIELDS
         $prepareTitleFields = function () use ($objTable) {
             $fields = null;
@@ -645,7 +864,7 @@ class CrudMakeCommand extends Command
                             <th>' . title_case(str_replace('_',' ',$t->singular)) . '</th>';
                             }
                         }
-                    } elseif (in_array($field->name, ['name', 'title', 'user', 'username', 'login', 'email', 'created_at', 'updated_at'])) {
+                    } elseif (in_array($field->name, ['name', 'title', 'user', 'username', 'login', 'email', 'created_at', 'updated_at', 'deleted_at'])) {
                         $fields .= '
                             <th>{{ trans(\'laravel-crud::view.' . str_replace('_', '-', $field->name) . '\') }}</th>';    
                     } else {
@@ -698,10 +917,10 @@ class CrudMakeCommand extends Command
                         }
                     } elseif ($field->type === 'date') {
                         $fields .= '
-                                <td>{{ @$' . $objTable->singular . '->' . $field->name . "->format('d/m/Y') }}</td>";
+                                <td>{{ blank($' . $objTable->singular . '->' . $field->name . ') ? null : @$' . $objTable->singular . '->' . $field->name . "->format('d/m/Y') }}</td>";
                     } elseif (in_array($field->type, ['datetime', 'timestamp'])) {
                         $fields .= '
-                                <td>{{ @$' . $objTable->singular . '->' . $field->name . "->format('d/m/Y H:i:s') }}</td>";
+                                <td>{{ blank($' . $objTable->singular . '->' . $field->name . ') ? null : @$' . $objTable->singular . '->' . $field->name . "->format('d/m/Y H:i:s') }}</td>";
                     } else {
                         $fields .= '
                                 <td>{{ $' . $objTable->singular . '->' . $field->name . ' }}</td>';
@@ -718,7 +937,7 @@ class CrudMakeCommand extends Command
             $fields = null;
 
             foreach ($objTable->fields as $field) {
-                if (! in_array($field->name, ['id',  'updated_at', 'created_at', 'remember_token'])) {
+                if (! in_array($field->name, ['id',  'updated_at', 'created_at', 'deleted_at', 'remember_token'])) {
 
                     if ($field->fk) {
                         foreach ($this->tables as $t) {
@@ -837,7 +1056,7 @@ class CrudMakeCommand extends Command
                                 break;
                             }
                         }
-                    } elseif(in_array($field->name, ['created_at', 'updated_at'])) {
+                    } elseif(in_array($field->name, ['created_at', 'updated_at', 'deleted_at'])) {
                         $fields .= '
                         <tr>
                             <th>{{ trans(\'laravel-crud::view.' . str_replace('_', '-', $field->name) . '\') }}</th>
@@ -887,6 +1106,8 @@ class CrudMakeCommand extends Command
             'uses' => $prepareUses(),
             'validators' => $prepareValidators(),
             'plucks' => $preparePlucks(),
+            'filters_set' => $prepareFiltersSet(),
+            'filters' => $prepareFilters(),
             'compacts' => $compacts,
             'compacts_c' => $compacts_c,
 
@@ -904,6 +1125,7 @@ class CrudMakeCommand extends Command
             'belongs_many' => $prepareSubTemplates('belongsMany'),
 
             // Index
+            'filters_fields' => $prepareFiltersFields(),
             'title_fields' => $prepareTitleFields(),
             'value_fields' => $prepareValueFields(),
 
@@ -935,6 +1157,8 @@ class CrudMakeCommand extends Command
                 'uses',
                 'validators',
                 'plucks',
+                'filters_set',
+                'filters',
                 'compacts',
                 'compacts_c',
             ],
@@ -1011,6 +1235,7 @@ class CrudMakeCommand extends Command
                 'plural',
                 'singular_uc',
                 'singular',
+                'filters_fields',
                 'title_fields',
                 'value_fields',
                 'primary_key',
@@ -1059,8 +1284,8 @@ class CrudMakeCommand extends Command
                 continue;
             }            
 
-            if (trim($this->option('t')) !== 'all' && trim($this->option('table')) !== 'all') {
-                $tableKey = trim($this->option('t')) !== '' ? $this->option('t') : $this->option('table');
+            if (trim($this->option('table')) !== 'all') {
+                $tableKey = $this->option('table');
                 if ((int) $tableKey !== (int) $key) {
                     continue;
                 }
@@ -1143,9 +1368,12 @@ class CrudMakeCommand extends Command
         // Process Path Models
         $this->processOptionPathModels();
 
-        // Process TABLES
+        // Process Table
         $this->processOptionTable();
         
+        // Process Api Client
+        $this->processOptionApiClient();
+
         // Process Controller
         $this->processFile('controller');
 

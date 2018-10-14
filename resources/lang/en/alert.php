@@ -7,5 +7,7 @@ return [
     'not-found'                     => ':element not found!',
     
     'you-sure'                      => 'Are you sure?',
-    'once-deleted'                  => 'Once deleted, you will not be able to recover this!'
+    'once-deleted'                  => 'Once deleted, you will not be able to recover this!',
+
+    'notification'                  => 'Notification sent successfully!',
 ];

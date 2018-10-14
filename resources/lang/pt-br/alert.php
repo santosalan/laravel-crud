@@ -7,5 +7,7 @@ return [
     'not-found'                     => ':element não encontrado!',
     
     'you-sure'                      => 'Está certo disso?',
-    'once-deleted'                  => 'Após excluir, não é possível desfazer essa ação!'
+    'once-deleted'                  => 'Após excluir, não é possível desfazer essa ação!',
+
+    'notification'                  => 'Notificação enviada com sucesso!',
 ];

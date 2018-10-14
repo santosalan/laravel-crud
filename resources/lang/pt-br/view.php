@@ -17,6 +17,7 @@ return [
     'email'                         => 'E-mail',
     'created-at'                    => 'Criado',
     'updated-at'                    => 'Atualizado',
+    'deleted-at'                    => 'Deletado',
     'actions'                       => 'Ações',
 
 
@@ -34,4 +35,10 @@ return [
     'btn-back'                      => 'Voltar',
     'btn-previous'                  => 'Anterior',
     'btn-next'                      => 'Próximo',
+    'btn-refresh'                   => 'Atualizar',
+    'btn-clear'                     => 'Limpar',
+    'btn-filter'                    => 'Filtrar',
+    'btn-search'                    => 'Pesquisar',
+    'btn-find'                      => 'Pesquisar',
+    'btn-validate'                  => 'Validar',
 ];

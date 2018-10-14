@@ -1,0 +1,276 @@
+<?php
+
+namespace App\Http\Controllers;
+
+{{{uses}}}
+use App\Services\CoreApiService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+
+class {{{plural_uc}}}Controller extends Controller
+{
+    /**
+     * Get a validator for an incoming registration request.
+     *
+     * @param  array  $data
+     * @return \Illuminate\Contracts\Validation\Validator
+     */
+    protected function validator(array $data)
+    {
+        return Validator::make($data, [
+            {{{validators}}}
+        ]);
+    }
+
+    /**
+     * INDEX - list {{{plural}}}
+     *
+     * @return view {{{plural}}}.index
+     */
+    public function index(Request $request)
+    {
+
+        $r = $request->all();
+        if ($request->isMethod('POST')) {
+
+            $filter = [
+                {{{filters_set}}}
+            ];
+
+            $request->session()->put('{{{plural}}}', [
+                                        'filter' => array_filter($filter),
+                                    ]);
+        }
+
+        if (blank($request->session()->get('{{{plural}}}')['filter'])) {
+            $request->session()->put('{{{plural}}}', [
+                                        'filter' => []
+                                    ]);
+        }
+
+        $filter = $request->session()->get('{{{plural}}}')['filter'];
+
+        $f = [
+            {{{filters}}}
+        ];
+
+
+        $response = json_decode(
+                        (new CoreApiService)
+                            ->toJson()
+                            ->{{{plural}}}(
+                                'GET', 
+                                [], 
+                                array_filter($f)
+                            )
+                    );
+
+        ${{{plural}}} = {{{singular_uc}}}::hydrate($response->{{{plural}}});
+
+        return view('{{{plural}}}.index', compact('{{{plural}}}', 'filter'));
+    }
+
+    /**
+     * CREATE - form {{{singular}}}
+     *
+     * @return view {{{plural}}}.form
+     */
+    public function create()
+    {
+        $response = json_decode(
+                        (new CoreApiService)
+                            ->toJson()
+                            ->{{{plural}}}(
+                                'GET',
+                                ['plucks']
+                            )
+                    );
+
+        $plucks = $response->plucks;
+
+        return view('{{{plural}}}.form', compact('plucks'));
+    }
+
+    /**
+     * STORE - store {{{singular}}}
+     *
+     * @param  Request $request 
+     * @return redirect {{{plural}}}
+     */
+    public function store(Request $request)
+    {
+        try {
+
+            $response = json_decode(
+                            (new CoreApiService)
+                                ->toJson()
+                                ->{{{plural}}}(
+                                    'POST', 
+                                    ['create'], 
+                                    $request->all()
+                                )
+                        );
+
+            if ($response->status === 200) {
+                $request->session()->flash(
+                    'msgSuccess', 
+                    trans('laravel-crud::alert.stored', ['element' => '{{{singular_uc}}}'])
+                );
+            }
+
+        } catch (\Exception $e) {
+            $request->session()->flash(
+                'msgError', 
+                $e->getMessage()
+            );
+
+            return redirect()->back();
+        }
+
+        return redirect('{{{plural}}}');
+    }
+
+    /**
+     * EDIT - edit {{{singular}}}
+     *
+     * @param  integer $id {{{singular}}}->id
+     * @return view {{{plural}}}.form
+     */
+    public function edit($id)
+    {
+        $response = json_decode(
+                        (new CoreApiService)
+                            ->{{{plural}}}(
+                                'GET', 
+                                [$id]
+                            )
+                    );
+
+        if ($response->status === 404) {  
+            $request->session()->flash(
+                'msgError', 
+                trans('laravel-crud::alert.not-found', ['element' => '{{{singular_uc}}}'])
+            );
+
+            return redirect('{{{plural}}}');
+        }
+
+        ${{{singular}}} = (new {{{singular_uc}}})->fill(
+                        (array) $response->{{{singular}}}
+                    );      
+
+        $response = json_decode(
+                        (new CoreApiService)
+                            ->toJson()
+                            ->{{{plural}}}(
+                                'GET',
+                                ['plucks']
+                            )
+                    );
+
+        $plucks = $response->plucks;  
+
+        return view('{{{plural}}}.form', compact('{{{singular}}}', 'plucks'));
+    }
+
+    /**
+     * UPDATE - update {{{singular}}}
+     *
+     * @param  integer $id      {{{singular}}}->id
+     * @param  Request $request 
+     * @return redirect {{{plural}}}
+     */
+    public function update($id, Request $request)
+    {
+        try {
+
+            $response = json_decode(
+                            (new CoreApiService)
+                                ->toJson()
+                                ->{{{plural}}}(
+                                    'PUT', 
+                                    [$id], 
+                                    $request->all()
+                                )
+                        );
+
+            if ($response->status === 200) {
+                $request->session()->flash(
+                    'msgSuccess', 
+                    trans('laravel-crud::alert.updated', ['element' => '{{{singular_uc}}}'])
+                );
+            }
+
+        } catch (\Exception $e) {
+            $request->session()->flash(
+                'msgError', 
+                $e->getMessage()
+            );
+
+            return redirect()->back();
+        }
+
+
+        return redirect('{{{plural}}}');
+    }
+
+    /**
+     * SHOW - show {{{singular}}}
+     *
+     * @param  integer $id  {{{singular}}}->id
+     * @return view         {{{plural}}}.show
+     */
+    public function show($id, Request $request)
+    {
+        $response = json_decode(
+                        (new CoreApiService)
+                            ->{{{plural}}}(
+                                'GET', 
+                                [$id]
+                            )
+                    );
+
+        if ($response->status === 404) {  
+            $request->session()->flash(
+                'msgError', 
+                trans('laravel-crud::alert.not-found', ['element' => '{{{singular_uc}}}'])
+            );
+
+            return redirect('{{{plural}}}');
+        }
+
+        ${{{singular}}} = (new {{{singular_uc}}})->fill(
+                        (array) $response->{{{singular}}}
+                    );
+
+        return view('{{{plural}}}.show', compact('{{{singular}}}'));
+    }
+
+    /**
+     * DESTROY - delete {{{singular}}}
+     *
+     * @param  integer $id      {{{singular}}}->id
+     * @return redirect         {{{plural}}}.index
+     */
+    public function destroy($id, Request $request)
+    {
+        ${{{singular}}} = {{{singular_uc}}}::find($id);
+
+        if (${{{singular}}}) {
+            ${{{singular}}}->delete();
+
+            $request->session()->flash(
+                'msgSuccess', 
+                trans('laravel-crud::alert.deleted', ['element' => '{{{singular_uc}}}'])
+            );
+            
+        } else {
+            $request->session()->flash(
+                'msgError', 
+                trans('laravel-crud::alert.not-found', ['element' => '{{{singular_uc}}}'])
+            );
+        }
+
+        return redirect('{{{plural}}}');
+    }
+}
