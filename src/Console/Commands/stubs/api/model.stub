@@ -36,7 +36,7 @@ class {{{singular_uc}}} extends Model
      * @var array
      */
     protected $fillable = [
-        {{{fillable}}}
+        '{{{primary_key}}}', {{{fillable}}}
     ];
 
     /**
