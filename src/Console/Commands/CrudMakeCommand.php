@@ -1361,6 +1361,9 @@ class CrudMakeCommand extends Command
      */
     public function handle()
     {
+     
+        // Process Api Client
+        $this->processOptionApiClient();
 
         // Process Routes
         $this->processOptionRoutes();
@@ -1371,9 +1374,6 @@ class CrudMakeCommand extends Command
         // Process Table
         $this->processOptionTable();
         
-        // Process Api Client
-        $this->processOptionApiClient();
-
         // Process Controller
         $this->processFile('controller');
 
