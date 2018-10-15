@@ -805,7 +805,7 @@ class CrudMakeCommand extends Command
                                 $fields .= '
                 <div class="col-xs-12 col-sm-6 col-md-4"> 
                     {{ Form::label("' . $field->name . '", "' . title_case(str_replace('_',' ',$t->singular)) . '", ["class" => "control-label"]) }}
-                    {{ Form::select("' . $field->name . '", $' . $t->plural . ', @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ']) }}
+                    {{ Form::select("' . $field->name . '", array_merge(["0" => ""], $plucks->' . $t->plural . '), @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ']) }}
                 </div>' . "\n";
                                 
                             }
@@ -945,7 +945,7 @@ class CrudMakeCommand extends Command
                                 $fields .= '
                     <div class="col-xs-12"> 
                         {{ Form::label("' . $field->name . '", "' . title_case(str_replace('_',' ',$t->singular)) . '", ["class" => "control-label"]) }}
-                        {{ Form::select("' . $field->name . '", $' . $t->plural . ', @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->required ? ', "required"' : '' ) . ']) }}
+                        {{ Form::select("' . $field->name . '", array_merge(["0" => ""], $plucks->' . $t->plural . '), @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->required ? ', "required"' : '' ) . ']) }}
                     </div>' . "\n";
                                 
                             }

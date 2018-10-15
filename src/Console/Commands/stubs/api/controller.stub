@@ -67,7 +67,18 @@ class {{{plural_uc}}}Controller extends Controller
 
         ${{{plural}}} = {{{singular_uc}}}::hydrate($response->{{{plural}}});
 
-        return view('{{{plural}}}.index', compact('{{{plural}}}', 'filter'));
+        $response = json_decode(
+                        (new CoreApiService)
+                            ->toJson()
+                            ->{{{plural}}}(
+                                'GET',
+                                ['plucks']
+                            )
+                    );
+
+        $plucks = $response->plucks;
+
+        return view('{{{plural}}}.index', compact('{{{plural}}}', 'filter', 'plucks'));
     }
 
     /**
