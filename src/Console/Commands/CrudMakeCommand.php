@@ -458,11 +458,27 @@ class CrudMakeCommand extends Command
             case 'datetime':
             case 'time':
             case 'timestamp':
-                    $filter = "@\$r['" . $objField->name . "'] ? \$r['" . $objField->name . "'] : null";
+                    $filter = "'" . $objField->name . "' => @\$r['" . $objField->name . "'] ? \$r['" . $objField->name . "'] : null";
                     break;
 
+            case 'integer':
+                    $filter = "'" . $objField->name . "' => isset(\$r['" . $objField->name . "']) ? \$r['" . $objField->name . "'] : null,
+                '" . $objField->name . "-options' => isset(\$r['" . $objField->name . "-options']) ? \$r['" . $objField->name . "-options'] : null,
+                '" . $objField->name . "-1' => isset(\$r['" . $objField->name . "-1']) 
+                                        ? \$r['" . $objField->name . "-1'] 
+                                        : (isset(\$r['" . $objField->name . "-2']) 
+                                                ? \$r['" . $objField->name . "-2'] 
+                                                : null),
+                '" . $objField->name . "-2' => isset(\$r['" . $objField->name . "-2']) 
+                                        ? \$r['" . $objField->name . "-2'] 
+                                        : (isset(\$r['" . $objField->name . "-1']) 
+                                                ? \$r['" . $objField->name . "-1'] 
+                                                : null)";
+                    break;
+
+
             default:
-                    $filter = "\$r['" . $objField->name . "']";
+                    $filter = "'" . $objField->name . "' => \$r['" . $objField->name . "']";
                     break;
         }
         
@@ -500,12 +516,16 @@ class CrudMakeCommand extends Command
         
         $filter = "isset(\$filter['" . $objField->name . "'])";
         switch ($funcType()) {
-            case 'string': 
-                    $filter .= " ? '%' . \$filter['" . $objField->name . "'] . '%' : null";
+            case 'integer':
+                    $filter = "isset(\$filter['" . $objField->name . "'])
+                                    ? [\$filter['" . $objField->name . "-options'], \$filter['" . $objField->name . "']] 
+                                    : (isset(\$filter['" . $objField->name . "-1']) && isset(\$filter['" . $objField->name . "-2']) 
+                                            ? [\$filter['" . $objField->name . "-options'], [\$filter['" . $objField->name . "-1'], \$filter['" . $objField->name . "-2']]]
+                                            : null)"; 
                     break;
 
-            case 'integer':
-                    $filter .= " ? \$filter['" . $objField->name . "'] : null";
+            case 'string': 
+                    $filter .= " ? '%' . \$filter['" . $objField->name . "'] . '%' : null";
                     break;
 
             default:
@@ -614,9 +634,9 @@ class CrudMakeCommand extends Command
                 }
 
                 if (empty($filters)) {
-                    $filters = "'" . $f->name . "' => " . $f->filter_set . ",\n";
+                    $filters = $f->filter_set . ",\n";
                 } else {
-                    $filters .= "                '" . $f->name . "' => " . $f->filter_set . ",\n";
+                    $filters .= "                " . $f->filter_set . ",\n";
                 }
             }
 
@@ -820,8 +840,30 @@ class CrudMakeCommand extends Command
                     } elseif ($field->type === 'int') {
                         $fields .= '
                 <div class="col-xs-12 col-sm-6 col-md-4">
-                    {{ Form::label("' . $field->name . '", "' . title_case(str_replace('_', ' ', $field->name)) . '", ["class" => "control-label"]) }}
-                    {{ Form::number("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
+                    <label for="' . $field->name . '" class="control-label">
+                        ' . title_case(str_replace('_', ' ', $field->name)) . '
+                        <select name="' . $field->name . '-options" id="' . $field->name . '-options" class="pull-right select-options" data-field="' . $field->name . '">
+                            <option value="=" {{ @$filter["' . $field->name . '-options"] == "=" ? "selected" : "" }}>igual</option>
+                            <option value="<" {{ @$filter["' . $field->name . '-options"] == "<" ? "selected" : "" }}>menor</option>
+                            <option value="<=" {{ @$filter["' . $field->name . '-options"] == "<=" ? "selected" : "" }}>menor igual</option>
+                            <option value=">" {{ @$filter["' . $field->name . '-options"] == ">" ? "selected" : "" }}>maior</option>
+                            <option value=">=" {{ @$filter["' . $field->name . '-options"] == ">=" ? "selected" : "" }}>maior igual</option>
+                            <option value="between" {{ @$filter["' . $field->name . '-options"] == "between" ? "selected" : "" }}>entre valores</option>
+                        </select>
+                    </label>
+                    <div id="' . $field->name . '-options-1">
+                        {{ Form::number("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "id" => "' . $field->name . '", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
+                    </div>
+                    <div id="' . $field->name . '-options-2" style="display:none;">
+                        <div class="row"> 
+                            <div class="col-xs-6"> 
+                                {{ Form::number("' . $field->name . '-1", @$filter["' . $field->name .'-1"], ["class" => "form-control", "id" => "' . $field->name . '-1", "placeholder" => "valor 01"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ', "disabled"]) }}
+                            </div>
+                            <div class="col-xs-6"> 
+                                {{ Form::number("' . $field->name . '-2", @$filter["' . $field->name .'-2"], ["class" => "form-control", "id" => "' . $field->name . '-2", "placeholder" => "valor 02"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ', "disabled"]) }}
+                            </div>
+                        </div>
+                    </div>
                 </div>' . "\n";
 
                     } elseif ($field->name === 'email') {

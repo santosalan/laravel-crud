@@ -25,6 +25,7 @@ class {{{plural_uc}}}Controller extends Controller
     /**
      * INDEX - list {{{plural}}}
      *
+     * @param  Request $request 
      * @return view {{{plural}}}.index
      */
     public function index(Request $request)
@@ -33,9 +34,7 @@ class {{{plural_uc}}}Controller extends Controller
         $r = $request->all();
         if ($request->isMethod('POST')) {
 
-            $filter = [
-                {{{filters_set}}}
-            ];
+            $filter = $this->prepareFilterSet($request);
 
             $request->session()->put('{{{plural}}}', [
                                         'filter' => array_filter($filter),
@@ -50,10 +49,7 @@ class {{{plural_uc}}}Controller extends Controller
 
         $filter = $request->session()->get('{{{plural}}}')['filter'];
 
-        $f = [
-            {{{filters}}}
-        ];
-
+        $f = $this->prepareFilters($filter);
 
         $response = json_decode(
                         (new CoreApiService)
@@ -283,5 +279,37 @@ class {{{plural_uc}}}Controller extends Controller
         }
 
         return redirect('{{{plural}}}');
+    }
+
+    /**
+     * PREPARE FILTER SET
+     *
+     * @param  Request $request 
+     * @return array filterSet
+     */
+    protected function prepareFilterSet(Request $request)
+    {
+        $r = $request->all();
+
+        $filterSet = [
+                {{{filters_set}}}
+            ];
+
+        return $filterSet;
+    }
+
+    /**
+     * PREPARE FILTERS
+     *
+     * @param  array filter 
+     * @return array filters
+     */
+    protected function prepareFilters(array $filter)
+    {
+        $filters = [
+                {{{filters}}}
+            ];
+
+        return $filters;
     }
 }

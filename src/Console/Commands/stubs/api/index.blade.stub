@@ -2,6 +2,27 @@
 
 @section('title', env('APP_NAME') . ' - {{{plural_uc}}}')
 
+@section('css')
+    <style>
+        .select-options{
+            border:0; 
+            border-bottom: 1px solid #00C0EF; 
+            color:#00C0EF; 
+            background:#FFF; 
+            margin:0 0 0 10px; 
+            padding: 0 3px; 
+            display: inline; 
+            width: auto; 
+            height: 20px; 
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            text-indent: 0.01px;
+            text-overflow: '';
+        }
+    </style>
+@endsection
+
 @section('content_header')
     
     <div class="page-header">
@@ -142,6 +163,26 @@
                     $(this).val("");
                 });
 
+                $('#' + $(this).parents('form').attr('id') + ' input[type=date]').each(function () {
+                    $(this).val("");
+                });
+
+                $('#' + $(this).parents('form').attr('id') + ' input[type=datetime-local]').each(function () {
+                    $(this).val("");
+                });
+
+                $('#' + $(this).parents('form').attr('id') + ' input[type=month]').each(function () {
+                    $(this).val("");
+                });
+
+                $('#' + $(this).parents('form').attr('id') + ' input[type=week]').each(function () {
+                    $(this).val("");
+                });
+
+                $('#' + $(this).parents('form').attr('id') + ' input[type=time]').each(function () {
+                    $(this).val("");
+                });
+
                 $('#' + $(this).parents('form').attr('id') + ' :text').each(function () {
                     $(this).val("");
                 });
@@ -166,6 +207,25 @@
                         $form.submit();
                     });
             });
+
+            $('.select-options').change(function(){
+                field = $(this).data('field');
+                if ($(this).val() === 'between') {
+                    $('#' + field + '-options-1').css({display: 'none'});
+                    $('#' + field).attr('disabled', true);
+                    $('#' + field + '-1').attr('disabled', false);
+                    $('#' + field + '-2').attr('disabled', false);
+                    $('#' + field + '-options-2').css({display: 'block'});
+
+                } else {
+                    $('#' + field + '-options-2').css({display: 'none'});
+                    $('#' + field).attr('disabled', false);
+                    $('#' + field + '-1').attr('disabled', true);
+                    $('#' + field + '-2').attr('disabled', true);
+                    $('#' + field + '-options-1').css({display: 'block'});
+                }
+            });
+            $('.select-options').change();
         })
     </script>
 
