@@ -6,6 +6,13 @@ return [
     'show'                          => 'Show',
     'edit'                          => 'Edit',
 
+    # Filters
+    'equal'                         => 'equal',
+    'less-than'                     => 'less than',
+    'less-equal'                    => 'less equal',
+    'greater-than'                  => 'greater than',
+    'greater-equal'                 => 'greater equal',
+    'between-values'                => 'between values',
 
     # Fields
     'name'                          => 'Name',

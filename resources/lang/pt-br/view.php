@@ -6,6 +6,13 @@ return [
     'show'                          => 'Visualizar',
     'edit'                          => 'Editar',
 
+    # Filters
+    'equal'                         => 'igual',
+    'less-than'                     => 'menor',
+    'less-equal'                    => 'menor igual',
+    'greater-than'                  => 'maior',
+    'greater-equal'                 => 'maior igual',
+    'between-values'                => 'entre valores',
 
     # Fields
     'name'                          => 'Nome',
