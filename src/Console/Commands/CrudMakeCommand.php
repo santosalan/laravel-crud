@@ -838,8 +838,8 @@ class CrudMakeCommand extends Command
                         ' . title_case(str_replace('_', ' ', $field->name)) . '
                         <select name="' . $field->name . '-options" id="' . $field->name . '-options" class="pull-right select-options" data-field="' . $field->name . '">
                             <option value="=" {{ @$filter["' . $field->name . '-options"] == "=" ? "selected" : "" }}>{{ trans("laravel-crud::view.equal") }}</option>
-                            <option value="<" {{ @$filter["' . $field->name . '-options"] == "<" ? "selected" : "" }}>{{ trans("laravel-crud::view.minor-than") }}</option>
-                            <option value="<=" {{ @$filter["' . $field->name . '-options"] == "<=" ? "selected" : "" }}>{{ trans("laravel-crud::view.minor-equal") }}</option>
+                            <option value="<" {{ @$filter["' . $field->name . '-options"] == "<" ? "selected" : "" }}>{{ trans("laravel-crud::view.less-than") }}</option>
+                            <option value="<=" {{ @$filter["' . $field->name . '-options"] == "<=" ? "selected" : "" }}>{{ trans("laravel-crud::view.less-equal") }}</option>
                             <option value=">" {{ @$filter["' . $field->name . '-options"] == ">" ? "selected" : "" }}>{{ trans("laravel-crud::view.greater-than") }}</option>
                             <option value=">=" {{ @$filter["' . $field->name . '-options"] == ">=" ? "selected" : "" }}>{{ trans("laravel-crud::view.greater-equal") }}</option>
                             <option value="between" {{ @$filter["' . $field->name . '-options"] == "between" ? "selected" : "" }}>{{ trans("laravel-crud::view.between-values") }}</option>
@@ -867,8 +867,8 @@ class CrudMakeCommand extends Command
                         ' . title_case(str_replace('_', ' ', $field->name)) . '
                         <select name="' . $field->name . '-options" id="' . $field->name . '-options" class="pull-right select-options" data-field="' . $field->name . '">
                             <option value="=" {{ @$filter["' . $field->name . '-options"] == "=" ? "selected" : "" }}>{{ trans("laravel-crud::view.equal") }}</option>
-                            <option value="<" {{ @$filter["' . $field->name . '-options"] == "<" ? "selected" : "" }}>{{ trans("laravel-crud::view.minor-than") }}</option>
-                            <option value="<=" {{ @$filter["' . $field->name . '-options"] == "<=" ? "selected" : "" }}>{{ trans("laravel-crud::view.minor-equal") }}</option>
+                            <option value="<" {{ @$filter["' . $field->name . '-options"] == "<" ? "selected" : "" }}>{{ trans("laravel-crud::view.less-than") }}</option>
+                            <option value="<=" {{ @$filter["' . $field->name . '-options"] == "<=" ? "selected" : "" }}>{{ trans("laravel-crud::view.less-equal") }}</option>
                             <option value=">" {{ @$filter["' . $field->name . '-options"] == ">" ? "selected" : "" }}>{{ trans("laravel-crud::view.greater-than") }}</option>
                             <option value=">=" {{ @$filter["' . $field->name . '-options"] == ">=" ? "selected" : "" }}>{{ trans("laravel-crud::view.greater-equal") }}</option>
                             <option value="between" {{ @$filter["' . $field->name . '-options"] == "between" ? "selected" : "" }}>{{ trans("laravel-crud::view.between-values") }}</option>
