@@ -458,9 +458,6 @@ class CrudMakeCommand extends Command
             case 'datetime':
             case 'time':
             case 'timestamp':
-                    $filter = "'" . $objField->name . "' => @\$r['" . $objField->name . "'] ? \$r['" . $objField->name . "'] : null";
-                    break;
-
             case 'integer':
                     $filter = "'" . $objField->name . "' => isset(\$r['" . $objField->name . "']) ? \$r['" . $objField->name . "'] : null,
                 '" . $objField->name . "-options' => isset(\$r['" . $objField->name . "-options']) ? \$r['" . $objField->name . "-options'] : null,
@@ -516,6 +513,10 @@ class CrudMakeCommand extends Command
         
         $filter = "isset(\$filter['" . $objField->name . "'])";
         switch ($funcType()) {
+            case 'date':
+            case 'datetime':
+            case 'time':
+            case 'timestamp':
             case 'integer':
                     $filter = "isset(\$filter['" . $objField->name . "'])
                                     ? [\$filter['" . $objField->name . "-options'], \$filter['" . $objField->name . "']] 
@@ -629,7 +630,7 @@ class CrudMakeCommand extends Command
         $prepareFiltersSet = function () use ($objTable) {
             $filters = '';
             foreach ($objTable->fields as $f) {
-                if (in_array($f->name, ['id', 'password', 'token', 'token_request', 'token_response', 'remember_token'])){
+                if (in_array($f->name, ['id', 'password', 'token', 'token_request', 'token_response', 'token_encrypt', 'remember_token'])){
                     continue;
                 }
 
@@ -647,7 +648,7 @@ class CrudMakeCommand extends Command
         $prepareFilters = function () use ($objTable) {
             $filters = '';
             foreach ($objTable->fields as $f) {
-                if (in_array($f->name, ['id', 'password', 'token', 'token_request', 'token_response', 'remember_token'])){
+                if (in_array($f->name, ['id', 'password', 'token', 'token_request', 'token_response', 'token_encrypt', 'remember_token'])){
                     continue;
                 }
 
@@ -748,7 +749,7 @@ class CrudMakeCommand extends Command
             $dates = null;
 
             foreach ($objTable->fields as $f) {
-                if (in_array($f->name, ['created_at', 'updated_at', 'deleted_at'])) {
+                if (in_array($f->name, ['created_at', 'updated_at'])) {
                     continue;
                 }
 
@@ -817,7 +818,7 @@ class CrudMakeCommand extends Command
             $fields = null;
 
             foreach ($objTable->fields as $field) {
-                if (! in_array($field->name, ['id', 'password', 'token', 'token_request', 'token_response', 'remember_token'])) {
+                if (! in_array($field->name, ['id', 'password', 'token', 'token_request', 'token_response', 'token_encrypt', 'remember_token'])) {
 
                     if ($field->fk) {
                         foreach ($this->tables as $t) {
@@ -830,11 +831,33 @@ class CrudMakeCommand extends Command
                                 
                             }
                         }
-                    } elseif (in_array($field->type, ['date', 'datetime', 'timestamp'])) {
+                    } elseif (in_array($field->type, ['date', 'datetime', 'time', 'timestamp'])) {
                         $fields .= '
                 <div class="col-xs-12 col-sm-6 col-md-4">
-                    {{ Form::label("' . $field->name . '", "' . title_case(str_replace('_', ' ', $field->name)) . '", ["class" => "control-label"]) }}
-                    {{ Form::date("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
+                    <label for="' . $field->name . '" class="control-label">
+                        ' . title_case(str_replace('_', ' ', $field->name)) . '
+                        <select name="' . $field->name . '-options" id="' . $field->name . '-options" class="pull-right select-options" data-field="' . $field->name . '">
+                            <option value="=" {{ @$filter["' . $field->name . '-options"] == "=" ? "selected" : "" }}>{{ trans("laravel-crud::view.equal") }}</option>
+                            <option value="<" {{ @$filter["' . $field->name . '-options"] == "<" ? "selected" : "" }}>{{ trans("laravel-crud::view.minor-than") }}</option>
+                            <option value="<=" {{ @$filter["' . $field->name . '-options"] == "<=" ? "selected" : "" }}>{{ trans("laravel-crud::view.minor-equal") }}</option>
+                            <option value=">" {{ @$filter["' . $field->name . '-options"] == ">" ? "selected" : "" }}>{{ trans("laravel-crud::view.greater-than") }}</option>
+                            <option value=">=" {{ @$filter["' . $field->name . '-options"] == ">=" ? "selected" : "" }}>{{ trans("laravel-crud::view.greater-equal") }}</option>
+                            <option value="between" {{ @$filter["' . $field->name . '-options"] == "between" ? "selected" : "" }}>{{ trans("laravel-crud::view.between-values") }}</option>
+                        </select>
+                    </label>
+                    <div id="' . $field->name . '-options-1">
+                        {{ Form::'. ($field->type == 'time' ? 'time' : 'date') . '("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
+                    </div>
+                    <div id="' . $field->name . '-options-2" style="display:none;">
+                        <div class="row"> 
+                            <div class="col-xs-6"> 
+                                {{ Form::'. ($field->type == 'time' ? 'time' : 'date') . '("' . $field->name . '-1", @$filter["' . $field->name .'-1"], ["class" => "form-control", "placeholder" => trans("laravel-crud::view.value-1")' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ', "disabled"]) }}
+                            </div>
+                            <div class="col-xs-6"> 
+                                {{ Form::'. ($field->type == 'time' ? 'time' : 'date') . '("' . $field->name . '-2", @$filter["' . $field->name .'-2"], ["class" => "form-control", "placeholder" => trans("laravel-crud::view.value-2")' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ', "disabled"]) }}
+                            </div>
+                        </div>
+                    </div>
                 </div>' . "\n";
 
                     } elseif ($field->type === 'int') {
@@ -857,10 +880,10 @@ class CrudMakeCommand extends Command
                     <div id="' . $field->name . '-options-2" style="display:none;">
                         <div class="row"> 
                             <div class="col-xs-6"> 
-                                {{ Form::number("' . $field->name . '-1", @$filter["' . $field->name .'-1"], ["class" => "form-control", "id" => "' . $field->name . '-1", "placeholder" => "valor 01"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ', "disabled"]) }}
+                                {{ Form::number("' . $field->name . '-1", @$filter["' . $field->name .'-1"], ["class" => "form-control", "id" => "' . $field->name . '-1", "placeholder" => trans("laravel-crud::view.value-1")' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ', "disabled"]) }}
                             </div>
                             <div class="col-xs-6"> 
-                                {{ Form::number("' . $field->name . '-2", @$filter["' . $field->name .'-2"], ["class" => "form-control", "id" => "' . $field->name . '-2", "placeholder" => "valor 02"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ', "disabled"]) }}
+                                {{ Form::number("' . $field->name . '-2", @$filter["' . $field->name .'-2"], ["class" => "form-control", "id" => "' . $field->name . '-2", "placeholder" => trans("laravel-crud::view.value-2")' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ', "disabled"]) }}
                             </div>
                         </div>
                     </div>

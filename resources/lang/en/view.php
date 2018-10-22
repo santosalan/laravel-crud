@@ -13,6 +13,9 @@ return [
     'greater-than'                  => 'greater than',
     'greater-equal'                 => 'greater equal',
     'between-values'                => 'between values',
+    'value-1'                       => 'Value 01',
+    'value-2'                       => 'Value 02',
+    
 
     # Fields
     'name'                          => 'Name',
