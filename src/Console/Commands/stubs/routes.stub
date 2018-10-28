@@ -3,6 +3,7 @@
  * {{{plural_uc}}}
  */
 Route::get('{{{plural}}}', '{{{plural_uc}}}Controller@index');
+Route::post('{{{plural}}}', '{{{plural_uc}}}Controller@index');
 Route::get('{{{plural}}}/create', '{{{plural_uc}}}Controller@create');
 Route::get('{{{plural}}}/{id}', '{{{plural_uc}}}Controller@show');
 Route::get('{{{plural}}}/{id}/edit', '{{{plural_uc}}}Controller@edit');
