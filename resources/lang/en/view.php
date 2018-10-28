@@ -5,6 +5,7 @@ return [
     'create'                        => 'Create',
     'show'                          => 'Show',
     'edit'                          => 'Edit',
+    'filters'                       => 'Filters',
 
     # Filters
     'equal'                         => 'equal',
@@ -15,7 +16,7 @@ return [
     'between-values'                => 'between values',
     'value-1'                       => 'Value 01',
     'value-2'                       => 'Value 02',
-    
+
 
     # Fields
     'name'                          => 'Name',
