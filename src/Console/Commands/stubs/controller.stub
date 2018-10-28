@@ -54,9 +54,11 @@ class {{{plural_uc}}}Controller extends Controller
             ${{{plural}}} = {{{singular_uc}}}::paginate();
         }
 
-        {{{plucks}}}
+        $plucks = [
+                {{{filter_plucks}}}
+            ];
 
-        return view('{{{plural}}}.index', compact('{{{plural}}}'{{{compacts}}}));
+        return view('{{{plural}}}.index', compact('{{{plural}}}', 'plucks'));
     }
 
     /**

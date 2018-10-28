@@ -663,6 +663,32 @@ class CrudMakeCommand extends Command
         };
 
         // PLUCKS
+        $prepareFilterPlucks = function () use ($objTable) {
+            $plucks = '';
+            foreach ($objTable->belongsTo as $b) {
+                foreach ($this->tables as $t) {
+                    if ($b !== $t->name) {
+                        continue;
+                    }
+
+                    list($pk, $display) = $this->getPkDisplay($t);
+
+                    if (empty($plucks)) {
+                        $plucks = "'" . $t->plural . "' => "
+                                . ucwords($t->singular) . "::pluck('" . $display . "', '" . $pk . "')"
+                                . ",\n";
+                    } else {
+                        $plucks .= "                '" . $t->plural . "' => "
+                                . ucwords($t->singular) . "::pluck('" . $display . "', '" . $pk . "')"
+                                . ",\n";
+                    }
+                }
+            }
+
+            return $plucks;
+        };
+
+        // PLUCKS
         $preparePlucks = function () use ($objTable) {
             $plucks = '';
             foreach ($objTable->belongsTo as $b) {
@@ -1188,6 +1214,7 @@ class CrudMakeCommand extends Command
             'uses' => $prepareUses(),
             'validators' => $prepareValidators(),
             'plucks' => $preparePlucks(),
+            'filter_plucks' => $prepareFilterPlucks(),
             'filters_set' => $prepareFiltersSet(),
             'filters' => $prepareFilters(),
             'compacts' => $compacts,
@@ -1241,6 +1268,7 @@ class CrudMakeCommand extends Command
                 'uses',
                 'validators',
                 'plucks',
+                'filter_plucks',
                 'filters_set',
                 'filters',
                 'compacts',
