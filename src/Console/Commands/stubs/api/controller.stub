@@ -57,7 +57,7 @@ class {{{plural_uc}}}Controller extends Controller
                             ->{{{plural}}}(
                                 'GET',
                                 [],
-                                array_filter($f)
+                                $f
                             )
                     );
 
@@ -310,6 +310,6 @@ class {{{plural_uc}}}Controller extends Controller
                 {{{filters}}}
             ];
 
-        return $filters;
+        return array_filter($filters);
     }
 }

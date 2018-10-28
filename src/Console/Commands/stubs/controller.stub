@@ -219,6 +219,6 @@ class {{{plural_uc}}}Controller extends Controller
                 {{{filters}}}
             ];
 
-        return $filters;
+        return array_filter($filters);
     }
 }
