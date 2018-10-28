@@ -58,7 +58,7 @@ class {{{plural_uc}}}Controller extends Controller
                 {{{plucks}}}
             ];
 
-        return view('{{{plural}}}.index', compact('{{{plural}}}', 'plucks'));
+        return view('{{{plural}}}.index', compact('{{{plural}}}', 'filter', 'plucks'));
     }
 
     /**
