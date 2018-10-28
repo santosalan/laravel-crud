@@ -4,10 +4,14 @@ namespace {{{namespace}}};
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
+use SantosAlan\LaravelUtils\ModelUtil;
+{{{use_soft_deletes}}}
 
 class {{{singular_uc}}} extends Model
 {
     use Notifiable;
+    use ModelUtil;
+    {{{trait_soft_deletes}}}
 
     /**
      * The table associated with the model.
@@ -70,5 +74,5 @@ class {{{singular_uc}}} extends Model
     {{{has_one}}}
     {{{has_many}}}
     {{{belongs_many}}}
-    
+
 }

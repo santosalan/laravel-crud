@@ -26,11 +26,38 @@ class {{{plural_uc}}}Controller extends Controller
      *
      * @return view {{{plural}}}.index
      */
-    public function index()
+    public function index(Request $request)
     {
-        ${{{plural}}} = {{{singular_uc}}}::paginate();
+        $r = $request->all();
+        if ($request->isMethod('POST')) {
 
-        return view('{{{plural}}}.index', compact('{{{plural}}}'));
+            $filter = $this->prepareFilterSet($request);
+
+            $request->session()->put('{{{plural}}}', [
+                                        'filter' => array_filter($filter),
+                                    ]);
+        }
+
+        if (blank($request->session()->get('{{{plural}}}')['filter'])) {
+            $request->session()->put('{{{plural}}}', [
+                                        'filter' => []
+                                    ]);
+        }
+
+        $filter = $request->session()->get('{{{plural}}}')['filter'];
+
+        $f = $this->prepareFilters($filter);
+
+        if (!blank($f)) {
+            # @TODO Preparar os WHEREs
+            ${{{plural}}}
+        } else {
+            ${{{plural}}} = {{{singular_uc}}}::paginate();
+        }
+
+        {{{plucks}}}
+
+        return view('{{{plural}}}.index', compact('{{{plural}}}'{{{compacts}}}));
     }
 
     /**
@@ -48,7 +75,7 @@ class {{{plural_uc}}}Controller extends Controller
     /**
      * STORE - store {{{singular}}}
      *
-     * @param  Request $request 
+     * @param  Request $request
      * @return redirect {{{plural}}}.create
      */
     public function store(Request $request)
@@ -56,7 +83,7 @@ class {{{plural_uc}}}Controller extends Controller
         {{{singular_uc}}}::create($request->all());
 
         $request->session()->flash(
-            'msgSuccess', 
+            'msgSuccess',
             trans('laravel-crud::alert.stored', ['element' => '{{{singular_uc}}}'])
         );
 
@@ -73,9 +100,9 @@ class {{{plural_uc}}}Controller extends Controller
     {
         ${{{singular}}} = {{{singular_uc}}}::find($id);
 
-        if (!${{{singular}}}) {            
+        if (!${{{singular}}}) {
             $request->session()->flash(
-                'msgError', 
+                'msgError',
                 trans('laravel-crud::alert.not-found', ['element' => '{{{singular_uc}}}'])
             );
 
@@ -91,7 +118,7 @@ class {{{plural_uc}}}Controller extends Controller
      * UPDATE - update {{{singular}}}
      *
      * @param  integer $id      {{{singular}}}->id
-     * @param  Request $request 
+     * @param  Request $request
      * @return view             {{{plural}}}.form
      */
     public function update($id, Request $request)
@@ -101,7 +128,7 @@ class {{{plural_uc}}}Controller extends Controller
         ${{{singular}}}->update($request->all());
 
         $request->session()->flash(
-            'msgSuccess', 
+            'msgSuccess',
             trans('laravel-crud::alert.updated', ['element' => '{{{singular_uc}}}'])
         );
 
@@ -118,9 +145,9 @@ class {{{plural_uc}}}Controller extends Controller
     {
         ${{{singular}}} = {{{singular_uc}}}::find($id);
 
-        if (!${{{singular}}}) {            
+        if (!${{{singular}}}) {
             $request->session()->flash(
-                'msgError', 
+                'msgError',
                 trans('laravel-crud::alert.not-found', ['element' => '{{{singular_uc}}}'])
             );
 
@@ -144,17 +171,49 @@ class {{{plural_uc}}}Controller extends Controller
             ${{{singular}}}->delete();
 
             $request->session()->flash(
-                'msgSuccess', 
+                'msgSuccess',
                 trans('laravel-crud::alert.deleted', ['element' => '{{{singular_uc}}}'])
             );
-            
+
         } else {
             $request->session()->flash(
-                'msgError', 
+                'msgError',
                 trans('laravel-crud::alert.not-found', ['element' => '{{{singular_uc}}}'])
             );
         }
 
         return redirect('{{{plural}}}');
+    }
+
+    /**
+     * PREPARE FILTER SET
+     *
+     * @param  Request $request
+     * @return array filterSet
+     */
+    protected function prepareFilterSet(Request $request)
+    {
+        $r = $request->all();
+
+        $filterSet = [
+                {{{filters_set}}}
+            ];
+
+        return $filterSet;
+    }
+
+    /**
+     * PREPARE FILTERS
+     *
+     * @param  array filter
+     * @return array filters
+     */
+    protected function prepareFilters(array $filter)
+    {
+        $filters = [
+                {{{filters}}}
+            ];
+
+        return $filters;
     }
 }

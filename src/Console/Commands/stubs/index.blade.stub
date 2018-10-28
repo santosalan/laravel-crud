@@ -2,15 +2,36 @@
 
 @section('title', env('APP_NAME') . ' - {{{plural_uc}}}')
 
+@section('css')
+    <style>
+        .select-options{
+            border:0;
+            border-bottom: 1px solid #00C0EF;
+            color:#00C0EF;
+            background:#FFF;
+            margin:0 0 0 10px;
+            padding: 0 3px;
+            display: inline;
+            width: auto;
+            height: 20px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            text-indent: 0.01px;
+            text-overflow: '';
+        }
+    </style>
+@endsection
+
 @section('content_header')
-    
+
     <div class="page-header">
         <h1>{{{plural_uc}}}</h1>
         <a href="{{ URL::to('{{{plural}}}/create') }}" class="btn btn-success" data-toggle="tooltip" data-placement="top" title="{{ trans('laravel-crud::view.btn-create') }}">
             <i class="fa fa-plus"></i> <span class="hidden-xs">{{ trans('laravel-crud::view.btn-create') }}</span>
         </a>
     </div>
-        
+
 @endsection
 
 @section('content')
@@ -31,6 +52,30 @@
         </div>
     @endif
 
+    <div class="box box-info">
+        {{ Form::open(['action' => '{{{plural_uc}}}Controller@index', 'method' => 'POST', 'id' => 'filter-form']) }}
+            <div class="box-header">
+                <h4><i class="fa fa-search"></i> {{ trans('laravel-crud::view.filters') }}</h4>
+            </div>
+
+            <div class="box-body">
+
+                {{{filters_fields}}}
+
+            </div>
+            <div class="box-footer">
+                <div class="col-lg-12 text-right">
+                    <span onClick="return false;" class="btn btn-default btnClear">
+                        <i class="fa fa-eraser"></i> {{ trans('laravel-crud::view.btn-clear') }}
+                    </span>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-search"></i> {{ trans('laravel-crud::view.btn-filter') }}
+                    </button>
+                </div>
+            </div>
+        {{ Form::close() }}
+    </div>
+
     <div class="box box-primary">
         <div class="box-body">
             <div class="table-responsive">
@@ -46,23 +91,23 @@
                             <tr>
                                 {{{value_fields}}}
                                 <td class="actions btn-group-sm">
-                                    {{ link_to('{{{plural}}}/' . ${{{singular}}}->{{{primary_key}}},'', 
+                                    {{ link_to('{{{plural}}}/' . ${{{singular}}}->{{{primary_key}}},'',
                                                 ['class' => 'btn btn-info fa fa-eye',
-                                                 'data-toggle' => 'tooltip', 
-                                                 'data-placement' => 'top', 
-                                                 'title' => trans('laravel-crud::view.btn-show')], 
+                                                 'data-toggle' => 'tooltip',
+                                                 'data-placement' => 'top',
+                                                 'title' => trans('laravel-crud::view.btn-show')],
                                                 false) }}
 
-                                    {{ link_to('{{{plural}}}/' . ${{{singular}}}->{{{primary_key}}} . '/edit','', 
+                                    {{ link_to('{{{plural}}}/' . ${{{singular}}}->{{{primary_key}}} . '/edit','',
                                                 ['class' => 'btn btn-warning fa fa-pencil',
-                                                 'data-toggle' => 'tooltip', 
-                                                 'data-placement' => 'top', 
-                                                 'title' => trans('laravel-crud::view.btn-edit')], 
+                                                 'data-toggle' => 'tooltip',
+                                                 'data-placement' => 'top',
+                                                 'title' => trans('laravel-crud::view.btn-edit')],
                                                 false) }}
 
-                                    {{ Form::model(${{{singular}}}, 
-                                        ['method' => 'delete', 
-                                         'action' => ['{{{plural_uc}}}Controller@destroy', ${{{singular}}}->id], 
+                                    {{ Form::model(${{{singular}}},
+                                        ['method' => 'delete',
+                                         'action' => ['{{{plural_uc}}}Controller@destroy', ${{{singular}}}->id],
                                          'class' => 'form-inline form-delete',
                                          'style' => 'display: inline;']) }}
                                         {{ Form::hidden('id', ${{{singular}}}->id) }}
@@ -89,7 +134,7 @@
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h3 class="modal-title" id="myModalLabel">
-                <i class="fa fa-exclamation fa-2x text-red"></i>  
+                <i class="fa fa-exclamation fa-2x text-red"></i>
                 {{ trans('laravel-crud::alert.you-sure') }}
             </h3>
           </div>
@@ -103,7 +148,7 @@
         </div>
       </div>
     </div>
-@endsection    
+@endsection
 
 
 @section('js')
@@ -111,6 +156,48 @@
     <script>
         $(function () {
             $('[data-toggle="tooltip"]').tooltip();
+
+            $('.btnClear').click(function () {
+
+                $('#' + $(this).parents('form').attr('id') + ' input[type=number]').each(function () {
+                    $(this).val("");
+                });
+
+                $('#' + $(this).parents('form').attr('id') + ' input[type=date]').each(function () {
+                    $(this).val("");
+                });
+
+                $('#' + $(this).parents('form').attr('id') + ' input[type=datetime-local]').each(function () {
+                    $(this).val("");
+                });
+
+                $('#' + $(this).parents('form').attr('id') + ' input[type=month]').each(function () {
+                    $(this).val("");
+                });
+
+                $('#' + $(this).parents('form').attr('id') + ' input[type=week]').each(function () {
+                    $(this).val("");
+                });
+
+                $('#' + $(this).parents('form').attr('id') + ' input[type=time]').each(function () {
+                    $(this).val("");
+                });
+
+                $('#' + $(this).parents('form').attr('id') + ' :text').each(function () {
+                    $(this).val("");
+                });
+
+                $('#' + $(this).parents('form').attr('id') + ' :radio').each(function () {
+                    $(this).prop({ checked: false });
+                });
+
+                $('#' + $(this).parents('form').attr('id') + ' select').each(function () {
+                    $(this).val(0);
+                });
+
+                $('#' + $(this).parents('form').attr('id')).submit();
+
+            });
 
             $('td').on('click', '.form-delete', function(e){
                 e.preventDefault();
@@ -120,12 +207,31 @@
                         $form.submit();
                     });
             });
+
+            $('.select-options').change(function(){
+                field = $(this).data('field');
+                if ($(this).val() === 'between') {
+                    $('#' + field + '-options-1').css({display: 'none'});
+                    $('#' + field).attr('disabled', true);
+                    $('#' + field + '-1').attr('disabled', false);
+                    $('#' + field + '-2').attr('disabled', false);
+                    $('#' + field + '-options-2').css({display: 'block'});
+
+                } else {
+                    $('#' + field + '-options-2').css({display: 'none'});
+                    $('#' + field).attr('disabled', false);
+                    $('#' + field + '-1').attr('disabled', true);
+                    $('#' + field + '-2').attr('disabled', true);
+                    $('#' + field + '-options-1').css({display: 'block'});
+                }
+            });
+            $('.select-options').change();
         })
     </script>
 
 @endsection
 
 
-                
-                            
-                        
+
+
+
