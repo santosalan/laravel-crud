@@ -49,8 +49,7 @@ class {{{plural_uc}}}Controller extends Controller
         $f = $this->prepareFilters($filter);
 
         if (!blank($f)) {
-            # @TODO Preparar os WHEREs
-            ${{{plural}}}
+            ${{{plural}}} = {{{singular_uc}}}::filter($f);
         } else {
             ${{{plural}}} = {{{singular_uc}}}::paginate();
         }

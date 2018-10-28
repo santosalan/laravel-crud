@@ -1253,6 +1253,8 @@ class CrudMakeCommand extends Command
                 'singular_uc',
                 'singular',
                 'namespace',
+                'use_soft_deletes',
+                'trait_soft_deletes',
                 'primary_key',
                 'auto_increment',
                 'fillable',
