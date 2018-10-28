@@ -857,8 +857,8 @@ class CrudMakeCommand extends Command
         };
 
         $prepareTitle = function ($field) {
-            if (in_array($field->name, ['name', 'title', 'user', 'username', 'login', 'email', 'created_at', 'updated_at', 'deleted_at'])) {
-                $title = "{{ trans('laravel-crud::view." . str_replace('_', '-', $field->name) . "') }}";
+            if (in_array($field, ['name', 'title', 'user', 'username', 'login', 'email', 'created_at', 'updated_at', 'deleted_at'])) {
+                $title = "{{ trans('laravel-crud::view." . str_replace('_', '-', $field) . "') }}";
             } else {
                 $title = title_case(str_replace('_', ' ', $field));
             }
@@ -867,7 +867,7 @@ class CrudMakeCommand extends Command
         };
 
         // FILTERS FIELDS
-        $prepareFiltersFields = function () use ($objTable) {
+        $prepareFiltersFields = function () use ($objTable, $prepareTitle) {
             $fields = null;
 
             foreach ($objTable->fields as $field) {
