@@ -864,7 +864,7 @@ class CrudMakeCommand extends Command
             }
 
             return $title;
-        }
+        };
 
         // FILTERS FIELDS
         $prepareFiltersFields = function () use ($objTable) {
