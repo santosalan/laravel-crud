@@ -49,13 +49,13 @@ class {{{plural_uc}}}Controller extends Controller
         $f = $this->prepareFilters($filter);
 
         if (!blank($f)) {
-            ${{{plural}}} = {{{singular_uc}}}::filter($f);
+            ${{{plural}}} = {{{singular_uc}}}::filter($f)->paginate();
         } else {
             ${{{plural}}} = {{{singular_uc}}}::paginate();
         }
 
         $plucks = [
-                {{{filter_plucks}}}
+                {{{plucks}}}
             ];
 
         return view('{{{plural}}}.index', compact('{{{plural}}}', 'plucks'));
@@ -68,9 +68,11 @@ class {{{plural_uc}}}Controller extends Controller
      */
     public function create()
     {
-        {{{plucks}}}
+        $plucks = [
+                {{{plucks}}}
+            ];
 
-        return view('{{{plural}}}.form'{{{compacts_c}}});
+        return view('{{{plural}}}.form', compact('plucks'));
     }
 
     /**
@@ -110,9 +112,11 @@ class {{{plural_uc}}}Controller extends Controller
             return redirect('{{{plural}}}');
         }
 
-        {{{plucks}}}
+        $plucks = [
+                {{{plucks}}}
+            ];
 
-        return view('{{{plural}}}.form', compact('{{{singular}}}'{{{compacts}}}));
+        return view('{{{plural}}}.form', compact('{{{singular}}}', 'plucks'));
     }
 
     /**

@@ -25,7 +25,7 @@ class {{{plural_uc}}}Controller extends Controller
     /**
      * INDEX - list {{{plural}}}
      *
-     * @param  Request $request 
+     * @param  Request $request
      * @return view {{{plural}}}.index
      */
     public function index(Request $request)
@@ -55,8 +55,8 @@ class {{{plural_uc}}}Controller extends Controller
                         (new CoreApiService)
                             ->toJson()
                             ->{{{plural}}}(
-                                'GET', 
-                                [], 
+                                'GET',
+                                [],
                                 array_filter($f)
                             )
                     );
@@ -72,7 +72,7 @@ class {{{plural_uc}}}Controller extends Controller
                             )
                     );
 
-        $plucks = $response->plucks;
+        $plucks = (array) $response->plucks;
 
         return view('{{{plural}}}.index', compact('{{{plural}}}', 'filter', 'plucks'));
     }
@@ -93,7 +93,7 @@ class {{{plural_uc}}}Controller extends Controller
                             )
                     );
 
-        $plucks = $response->plucks;
+        $plucks = (array) $response->plucks;
 
         return view('{{{plural}}}.form', compact('plucks'));
     }
@@ -101,7 +101,7 @@ class {{{plural_uc}}}Controller extends Controller
     /**
      * STORE - store {{{singular}}}
      *
-     * @param  Request $request 
+     * @param  Request $request
      * @return redirect {{{plural}}}
      */
     public function store(Request $request)
@@ -112,22 +112,22 @@ class {{{plural_uc}}}Controller extends Controller
                             (new CoreApiService)
                                 ->toJson()
                                 ->{{{plural}}}(
-                                    'POST', 
-                                    ['create'], 
+                                    'POST',
+                                    ['create'],
                                     $request->all()
                                 )
                         );
 
             if ($response->status === 200) {
                 $request->session()->flash(
-                    'msgSuccess', 
+                    'msgSuccess',
                     trans('laravel-crud::alert.stored', ['element' => '{{{singular_uc}}}'])
                 );
             }
 
         } catch (\Exception $e) {
             $request->session()->flash(
-                'msgError', 
+                'msgError',
                 $e->getMessage()
             );
 
@@ -148,14 +148,14 @@ class {{{plural_uc}}}Controller extends Controller
         $response = json_decode(
                         (new CoreApiService)
                             ->{{{plural}}}(
-                                'GET', 
+                                'GET',
                                 [$id]
                             )
                     );
 
-        if ($response->status === 404) {  
+        if ($response->status === 404) {
             $request->session()->flash(
-                'msgError', 
+                'msgError',
                 trans('laravel-crud::alert.not-found', ['element' => '{{{singular_uc}}}'])
             );
 
@@ -164,7 +164,7 @@ class {{{plural_uc}}}Controller extends Controller
 
         ${{{singular}}} = (new {{{singular_uc}}})->fill(
                         (array) $response->{{{singular}}}
-                    );      
+                    );
 
         $response = json_decode(
                         (new CoreApiService)
@@ -175,7 +175,7 @@ class {{{plural_uc}}}Controller extends Controller
                             )
                     );
 
-        $plucks = $response->plucks;  
+        $plucks = (array) $response->plucks;
 
         return view('{{{plural}}}.form', compact('{{{singular}}}', 'plucks'));
     }
@@ -184,7 +184,7 @@ class {{{plural_uc}}}Controller extends Controller
      * UPDATE - update {{{singular}}}
      *
      * @param  integer $id      {{{singular}}}->id
-     * @param  Request $request 
+     * @param  Request $request
      * @return redirect {{{plural}}}
      */
     public function update($id, Request $request)
@@ -195,22 +195,22 @@ class {{{plural_uc}}}Controller extends Controller
                             (new CoreApiService)
                                 ->toJson()
                                 ->{{{plural}}}(
-                                    'PUT', 
-                                    [$id], 
+                                    'PUT',
+                                    [$id],
                                     $request->all()
                                 )
                         );
 
             if ($response->status === 200) {
                 $request->session()->flash(
-                    'msgSuccess', 
+                    'msgSuccess',
                     trans('laravel-crud::alert.updated', ['element' => '{{{singular_uc}}}'])
                 );
             }
 
         } catch (\Exception $e) {
             $request->session()->flash(
-                'msgError', 
+                'msgError',
                 $e->getMessage()
             );
 
@@ -232,14 +232,14 @@ class {{{plural_uc}}}Controller extends Controller
         $response = json_decode(
                         (new CoreApiService)
                             ->{{{plural}}}(
-                                'GET', 
+                                'GET',
                                 [$id]
                             )
                     );
 
-        if ($response->status === 404) {  
+        if ($response->status === 404) {
             $request->session()->flash(
-                'msgError', 
+                'msgError',
                 trans('laravel-crud::alert.not-found', ['element' => '{{{singular_uc}}}'])
             );
 
@@ -267,13 +267,13 @@ class {{{plural_uc}}}Controller extends Controller
             ${{{singular}}}->delete();
 
             $request->session()->flash(
-                'msgSuccess', 
+                'msgSuccess',
                 trans('laravel-crud::alert.deleted', ['element' => '{{{singular_uc}}}'])
             );
-            
+
         } else {
             $request->session()->flash(
-                'msgError', 
+                'msgError',
                 trans('laravel-crud::alert.not-found', ['element' => '{{{singular_uc}}}'])
             );
         }
@@ -284,7 +284,7 @@ class {{{plural_uc}}}Controller extends Controller
     /**
      * PREPARE FILTER SET
      *
-     * @param  Request $request 
+     * @param  Request $request
      * @return array filterSet
      */
     protected function prepareFilterSet(Request $request)
@@ -301,7 +301,7 @@ class {{{plural_uc}}}Controller extends Controller
     /**
      * PREPARE FILTERS
      *
-     * @param  array filter 
+     * @param  array filter
      * @return array filters
      */
     protected function prepareFilters(array $filter)
