@@ -878,8 +878,12 @@ class CrudMakeCommand extends Command
                             if ($t->name === $field->fk) {
                                 $fields .= '
                 <div class="col-xs-12 col-sm-6 col-md-4">
-                    {{ Form::label("' . $field->name . '", "' . title_case(str_replace('_',' ',$t->singular)) . '", ["class" => "control-label"]) }}
-                    {{ Form::select("' . $field->name . '", array_merge(["0" => ""], $plucks["' . $t->plural . '"]), @$filter["' . $field->name .'"], ["class" => "form-control"' . ']) }}
+                    <div class="form-group">
+                        <label for="' . $field->name . '" class="control-label">
+                            ' . $prepareTitle($t->singular) . '
+                        </label>
+                        {{ Form::select("' . $field->name . '", array_merge(["0" => ""], $plucks["' . $t->plural . '"]), @$filter["' . $field->name .'"], ["class" => "form-control"' . ']) }}
+                    </div>
                 </div>' . "\n";
 
                             }
@@ -887,27 +891,29 @@ class CrudMakeCommand extends Command
                     } elseif (in_array($field->type, ['date', 'datetime', 'time', 'timestamp'])) {
                         $fields .= '
                 <div class="col-xs-12 col-sm-6 col-md-4">
-                    <label for="' . $field->name . '" class="control-label">
-                        ' . $prepareTitle($field->name) . '
-                        <select name="' . $field->name . '-options" id="' . $field->name . '-options" class="pull-right select-options" data-field="' . $field->name . '">
-                            <option value="=" {{ @$filter["' . $field->name . '-options"] == "=" ? "selected" : "" }}>{{ trans("laravel-crud::view.equal") }}</option>
-                            <option value="<" {{ @$filter["' . $field->name . '-options"] == "<" ? "selected" : "" }}>{{ trans("laravel-crud::view.less-than") }}</option>
-                            <option value="<=" {{ @$filter["' . $field->name . '-options"] == "<=" ? "selected" : "" }}>{{ trans("laravel-crud::view.less-equal") }}</option>
-                            <option value=">" {{ @$filter["' . $field->name . '-options"] == ">" ? "selected" : "" }}>{{ trans("laravel-crud::view.greater-than") }}</option>
-                            <option value=">=" {{ @$filter["' . $field->name . '-options"] == ">=" ? "selected" : "" }}>{{ trans("laravel-crud::view.greater-equal") }}</option>
-                            <option value="between" {{ @$filter["' . $field->name . '-options"] == "between" ? "selected" : "" }}>{{ trans("laravel-crud::view.between-values") }}</option>
-                        </select>
-                    </label>
-                    <div id="' . $field->name . '-options-1">
-                        {{ Form::'. ($field->type == 'time' ? 'time' : 'date') . '("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
-                    </div>
-                    <div id="' . $field->name . '-options-2" style="display:none;">
-                        <div class="row">
-                            <div class="col-xs-6">
-                                {{ Form::'. ($field->type == 'time' ? 'time' : 'date') . '("' . $field->name . '-1", @$filter["' . $field->name .'-1"], ["class" => "form-control", "placeholder" => trans("laravel-crud::view.value-1")' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ', "disabled"]) }}
-                            </div>
-                            <div class="col-xs-6">
-                                {{ Form::'. ($field->type == 'time' ? 'time' : 'date') . '("' . $field->name . '-2", @$filter["' . $field->name .'-2"], ["class" => "form-control", "placeholder" => trans("laravel-crud::view.value-2")' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ', "disabled"]) }}
+                    <div class="form-group">
+                        <label for="' . $field->name . '" class="control-label">
+                            ' . $prepareTitle($field->name) . '
+                            <select name="' . $field->name . '-options" id="' . $field->name . '-options" class="pull-right select-options" data-field="' . $field->name . '">
+                                <option value="=" {{ @$filter["' . $field->name . '-options"] == "=" ? "selected" : "" }}>{{ trans("laravel-crud::view.equal") }}</option>
+                                <option value="<" {{ @$filter["' . $field->name . '-options"] == "<" ? "selected" : "" }}>{{ trans("laravel-crud::view.less-than") }}</option>
+                                <option value="<=" {{ @$filter["' . $field->name . '-options"] == "<=" ? "selected" : "" }}>{{ trans("laravel-crud::view.less-equal") }}</option>
+                                <option value=">" {{ @$filter["' . $field->name . '-options"] == ">" ? "selected" : "" }}>{{ trans("laravel-crud::view.greater-than") }}</option>
+                                <option value=">=" {{ @$filter["' . $field->name . '-options"] == ">=" ? "selected" : "" }}>{{ trans("laravel-crud::view.greater-equal") }}</option>
+                                <option value="between" {{ @$filter["' . $field->name . '-options"] == "between" ? "selected" : "" }}>{{ trans("laravel-crud::view.between-values") }}</option>
+                            </select>
+                        </label>
+                        <div id="' . $field->name . '-options-1">
+                            {{ Form::'. ($field->type == 'time' ? 'time' : 'date') . '("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "id" => "' . $field->name . '", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
+                        </div>
+                        <div id="' . $field->name . '-options-2" style="display:none;">
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    {{ Form::'. ($field->type == 'time' ? 'time' : 'date') . '("' . $field->name . '-1", @$filter["' . $field->name .'-1"], ["class" => "form-control", "id" => "' . $field->name . '-1", "placeholder" => trans("laravel-crud::view.value-1")' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ', "disabled"]) }}
+                                </div>
+                                <div class="col-xs-6">
+                                    {{ Form::'. ($field->type == 'time' ? 'time' : 'date') . '("' . $field->name . '-2", @$filter["' . $field->name .'-2"], ["class" => "form-control", "id" => "' . $field->name . '-2", "placeholder" => trans("laravel-crud::view.value-2")' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ', "disabled"]) }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -916,27 +922,29 @@ class CrudMakeCommand extends Command
                     } elseif ($field->type === 'int') {
                         $fields .= '
                 <div class="col-xs-12 col-sm-6 col-md-4">
-                    <label for="' . $field->name . '" class="control-label">
-                        ' . $prepareTitle($field->name) . '
-                        <select name="' . $field->name . '-options" id="' . $field->name . '-options" class="pull-right select-options" data-field="' . $field->name . '">
-                            <option value="=" {{ @$filter["' . $field->name . '-options"] == "=" ? "selected" : "" }}>{{ trans("laravel-crud::view.equal") }}</option>
-                            <option value="<" {{ @$filter["' . $field->name . '-options"] == "<" ? "selected" : "" }}>{{ trans("laravel-crud::view.less-than") }}</option>
-                            <option value="<=" {{ @$filter["' . $field->name . '-options"] == "<=" ? "selected" : "" }}>{{ trans("laravel-crud::view.less-equal") }}</option>
-                            <option value=">" {{ @$filter["' . $field->name . '-options"] == ">" ? "selected" : "" }}>{{ trans("laravel-crud::view.greater-than") }}</option>
-                            <option value=">=" {{ @$filter["' . $field->name . '-options"] == ">=" ? "selected" : "" }}>{{ trans("laravel-crud::view.greater-equal") }}</option>
-                            <option value="between" {{ @$filter["' . $field->name . '-options"] == "between" ? "selected" : "" }}>{{ trans("laravel-crud::view.between-values") }}</option>
-                        </select>
-                    </label>
-                    <div id="' . $field->name . '-options-1">
-                        {{ Form::number("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "id" => "' . $field->name . '", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
-                    </div>
-                    <div id="' . $field->name . '-options-2" style="display:none;">
-                        <div class="row">
-                            <div class="col-xs-6">
-                                {{ Form::number("' . $field->name . '-1", @$filter["' . $field->name .'-1"], ["class" => "form-control", "id" => "' . $field->name . '-1", "placeholder" => trans("laravel-crud::view.value-1")' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ', "disabled"]) }}
-                            </div>
-                            <div class="col-xs-6">
-                                {{ Form::number("' . $field->name . '-2", @$filter["' . $field->name .'-2"], ["class" => "form-control", "id" => "' . $field->name . '-2", "placeholder" => trans("laravel-crud::view.value-2")' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ', "disabled"]) }}
+                    <div class="form-group">
+                        <label for="' . $field->name . '" class="control-label">
+                            ' . $prepareTitle($field->name) . '
+                            <select name="' . $field->name . '-options" id="' . $field->name . '-options" class="pull-right select-options" data-field="' . $field->name . '">
+                                <option value="=" {{ @$filter["' . $field->name . '-options"] == "=" ? "selected" : "" }}>{{ trans("laravel-crud::view.equal") }}</option>
+                                <option value="<" {{ @$filter["' . $field->name . '-options"] == "<" ? "selected" : "" }}>{{ trans("laravel-crud::view.less-than") }}</option>
+                                <option value="<=" {{ @$filter["' . $field->name . '-options"] == "<=" ? "selected" : "" }}>{{ trans("laravel-crud::view.less-equal") }}</option>
+                                <option value=">" {{ @$filter["' . $field->name . '-options"] == ">" ? "selected" : "" }}>{{ trans("laravel-crud::view.greater-than") }}</option>
+                                <option value=">=" {{ @$filter["' . $field->name . '-options"] == ">=" ? "selected" : "" }}>{{ trans("laravel-crud::view.greater-equal") }}</option>
+                                <option value="between" {{ @$filter["' . $field->name . '-options"] == "between" ? "selected" : "" }}>{{ trans("laravel-crud::view.between-values") }}</option>
+                            </select>
+                        </label>
+                        <div id="' . $field->name . '-options-1">
+                            {{ Form::number("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "id" => "' . $field->name . '", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
+                        </div>
+                        <div id="' . $field->name . '-options-2" style="display:none;">
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    {{ Form::number("' . $field->name . '-1", @$filter["' . $field->name .'-1"], ["class" => "form-control", "id" => "' . $field->name . '-1", "placeholder" => trans("laravel-crud::view.value-1")' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ', "disabled"]) }}
+                                </div>
+                                <div class="col-xs-6">
+                                    {{ Form::number("' . $field->name . '-2", @$filter["' . $field->name .'-2"], ["class" => "form-control", "id" => "' . $field->name . '-2", "placeholder" => trans("laravel-crud::view.value-2")' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ', "disabled"]) }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -945,27 +953,33 @@ class CrudMakeCommand extends Command
                     } elseif ($field->name === 'email') {
                         $fields .= '
                 <div class="col-xs-12 col-sm-6 col-md-4">
-                    <label for="' . $field->name . '" class="control-label">
-                        ' . $prepareTitle($field->name) . '
-                    </label>
-                    {{ Form::email("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => trans(\'laravel-crud::view.email\')' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
+                    <div class="form-group">
+                        <label for="' . $field->name . '" class="control-label">
+                            ' . $prepareTitle($field->name) . '
+                        </label>
+                        {{ Form::email("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => trans(\'laravel-crud::view.email\')' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
+                    </div>
                 </div>' . "\n";
 
                     } elseif (in_array($field->name, ['name', 'title', 'user', 'username', 'login'])) {
                         $fields .= '
                 <div class="col-xs-12 col-sm-6 col-md-4">
-                    <label for="' . $field->name . '" class="control-label">
-                        ' . $prepareTitle($field->name) . '
-                    </label>
-                    {{ Form::text("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => trans(\'laravel-crud::view.' . $field->name . '\')' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
+                    <div class="form-group">
+                        <label for="' . $field->name . '" class="control-label">
+                            ' . $prepareTitle($field->name) . '
+                        </label>
+                        {{ Form::text("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => trans(\'laravel-crud::view.' . $field->name . '\')' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
+                    </div>
                 </div>' . "\n";
                     } else {
                         $fields .= '
                 <div class="col-xs-12 col-sm-6 col-md-4">
-                    <label for="' . $field->name . '" class="control-label">
-                        ' . $prepareTitle($field->name) . '
-                    </label>
-                    {{ Form::text("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
+                    <div class="form-group">
+                        <label for="' . $field->name . '" class="control-label">
+                            ' . $prepareTitle($field->name) . '
+                        </label>
+                        {{ Form::text("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
+                    </div>
                 </div>' . "\n";
                     }
                 }

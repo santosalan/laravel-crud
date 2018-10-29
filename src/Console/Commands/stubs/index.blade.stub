@@ -19,6 +19,7 @@
             appearance: none;
             text-indent: 0.01px;
             text-overflow: '';
+            cursor: pointer;
         }
     </style>
 @endsection
@@ -59,9 +60,7 @@
             </div>
 
             <div class="box-body">
-
                 {{{filters_fields}}}
-
             </div>
             <div class="box-footer">
                 <div class="col-lg-12 text-right">
