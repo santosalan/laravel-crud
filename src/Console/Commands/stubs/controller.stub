@@ -54,9 +54,7 @@ class {{{plural_uc}}}Controller extends Controller
             ${{{plural}}} = {{{singular_uc}}}::paginate();
         }
 
-        $plucks = [
-                {{{plucks}}}
-            ];
+        $plucks = $this->preparePlucks();
 
         return view('{{{plural}}}.index', compact('{{{plural}}}', 'filter', 'plucks'));
     }
@@ -68,9 +66,7 @@ class {{{plural_uc}}}Controller extends Controller
      */
     public function create()
     {
-        $plucks = [
-                {{{plucks}}}
-            ];
+        $plucks = $this->preparePlucks();
 
         return view('{{{plural}}}.form', compact('plucks'));
     }
@@ -112,9 +108,7 @@ class {{{plural_uc}}}Controller extends Controller
             return redirect('{{{plural}}}');
         }
 
-        $plucks = [
-                {{{plucks}}}
-            ];
+        $plucks = $this->preparePlucks();
 
         return view('{{{plural}}}.form', compact('{{{singular}}}', 'plucks'));
     }
@@ -188,6 +182,20 @@ class {{{plural_uc}}}Controller extends Controller
         }
 
         return redirect('{{{plural}}}');
+    }
+
+    /**
+     * PREPARE PLUCKS
+     *
+     * @return array plucks
+     */
+    protected function preparePlucks()
+    {
+        $plucks = [
+                {{{plucks}}}
+            ];
+
+        return $plucks;
     }
 
     /**

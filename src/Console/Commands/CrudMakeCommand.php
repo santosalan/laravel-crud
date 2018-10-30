@@ -675,11 +675,11 @@ class CrudMakeCommand extends Command
 
                     if (empty($plucks)) {
                         $plucks = "'" . $t->plural . "' => "
-                                . ucwords($t->singular) . "::pluck('" . $display . "', '" . $pk . "')->toArray()"
+                                . ucwords($t->singular) . "::pluck('" . $display . "', '" . $pk . "')"
                                 . ",\n";
                     } else {
                         $plucks .= "                '" . $t->plural . "' => "
-                                . ucwords($t->singular) . "::pluck('" . $display . "', '" . $pk . "')->toArray()"
+                                . ucwords($t->singular) . "::pluck('" . $display . "', '" . $pk . "')"
                                 . ",\n";
                     }
                 }
@@ -882,7 +882,7 @@ class CrudMakeCommand extends Command
                         <label for="' . $field->name . '" class="control-label">
                             ' . $prepareTitle($t->singular) . '
                         </label>
-                        {{ Form::select("' . $field->name . '", array_merge(["0" => ""], $plucks["' . $t->plural . '"]), @$filter["' . $field->name .'"], ["class" => "form-control"' . ']) }}
+                        {{ Form::select("' . $field->name . '", $plucks["' . $t->plural . '"], @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => ""]) }}
                     </div>
                 </div>' . "\n";
 
@@ -1083,7 +1083,7 @@ class CrudMakeCommand extends Command
                                 $fields .= '
                     <div class="col-xs-12">
                         {{ Form::label("' . $field->name . '", "' . title_case(str_replace('_',' ',$t->singular)) . '", ["class" => "control-label"]) }}
-                        {{ Form::select("' . $field->name . '", array_merge(["0" => ""], $plucks["' . $t->plural . '"]), @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control"' . ( $field->required ? ', "required"' : '' ) . ']) }}
+                        {{ Form::select("' . $field->name . '", $plucks["' . $t->plural . '"], @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => ""' . ( $field->required ? ', "required"' : '' ) . ']) }}
                     </div>' . "\n";
 
                             }
