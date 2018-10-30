@@ -518,11 +518,15 @@ class CrudMakeCommand extends Command
             case 'time':
             case 'timestamp':
             case 'integer':
-                    $filter = "isset(\$filter['" . $objField->name . "'])
-                                    ? [\$filter['" . $objField->name . "-options'], \$filter['" . $objField->name . "']]
-                                    : (isset(\$filter['" . $objField->name . "-1']) && isset(\$filter['" . $objField->name . "-2'])
-                                            ? [\$filter['" . $objField->name . "-options'], [\$filter['" . $objField->name . "-1'], \$filter['" . $objField->name . "-2']]]
-                                            : null)";
+                    if (!$objField->fk) {
+                        $filter = "isset(\$filter['" . $objField->name . "'])
+                                        ? [\$filter['" . $objField->name . "-options'], \$filter['" . $objField->name . "']]
+                                        : (isset(\$filter['" . $objField->name . "-1']) && isset(\$filter['" . $objField->name . "-2'])
+                                                ? [\$filter['" . $objField->name . "-options'], [\$filter['" . $objField->name . "-1'], \$filter['" . $objField->name . "-2']]]
+                                                : null)";
+                    } else {
+                        $filter .= " ? \$filter['" . $objField->name . "'] : null";
+                    }
                     break;
 
             case 'string':
