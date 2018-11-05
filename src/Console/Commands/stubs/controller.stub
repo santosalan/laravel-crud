@@ -24,7 +24,7 @@ class {{{plural_uc}}}Controller extends Controller
     /**
      * INDEX - list {{{plural}}}
      *
-     * @return view {{{plural}}}.index
+     * @return view {{{kebab_plural}}}.index
      */
     public function index(Request $request)
     {
@@ -56,26 +56,26 @@ class {{{plural_uc}}}Controller extends Controller
 
         $plucks = $this->preparePlucks();
 
-        return view('{{{plural}}}.index', compact('{{{plural}}}', 'filter', 'plucks'));
+        return view('{{{kebab_plural}}}.index', compact('{{{plural}}}', 'filter', 'plucks'));
     }
 
     /**
      * CREATE - form {{{singular}}}
      *
-     * @return view {{{plural}}}.form
+     * @return view {{{kebab_plural}}}.form
      */
     public function create()
     {
         $plucks = $this->preparePlucks();
 
-        return view('{{{plural}}}.form', compact('plucks'));
+        return view('{{{kebab_plural}}}.form', compact('plucks'));
     }
 
     /**
      * STORE - store {{{singular}}}
      *
      * @param  Request $request
-     * @return redirect {{{plural}}}.create
+     * @return redirect {{{kebab_plural}}}.create
      */
     public function store(Request $request)
     {
@@ -86,14 +86,14 @@ class {{{plural_uc}}}Controller extends Controller
             trans('laravel-crud::alert.stored', ['element' => '{{{singular_uc}}}'])
         );
 
-        return redirect('{{{plural}}}/create');
+        return redirect('{{{kebab_plural}}}/create');
     }
 
     /**
      * EDIT - edit {{{singular}}}
      *
      * @param  integer $id {{{singular}}}->id
-     * @return view {{{plural}}}.form
+     * @return view {{{kebab_plural}}}.form
      */
     public function edit($id, Request $request)
     {
@@ -105,12 +105,12 @@ class {{{plural_uc}}}Controller extends Controller
                 trans('laravel-crud::alert.not-found', ['element' => '{{{singular_uc}}}'])
             );
 
-            return redirect('{{{plural}}}');
+            return redirect('{{{kebab_plural}}}');
         }
 
         $plucks = $this->preparePlucks();
 
-        return view('{{{plural}}}.form', compact('{{{singular}}}', 'plucks'));
+        return view('{{{kebab_plural}}}.form', compact('{{{singular}}}', 'plucks'));
     }
 
     /**
@@ -118,7 +118,7 @@ class {{{plural_uc}}}Controller extends Controller
      *
      * @param  integer $id      {{{singular}}}->id
      * @param  Request $request
-     * @return view             {{{plural}}}.form
+     * @return view             {{{kebab_plural}}}.form
      */
     public function update($id, Request $request)
     {
@@ -131,14 +131,14 @@ class {{{plural_uc}}}Controller extends Controller
             trans('laravel-crud::alert.updated', ['element' => '{{{singular_uc}}}'])
         );
 
-        return redirect('{{{plural}}}');
+        return redirect('{{{kebab_plural}}}');
     }
 
     /**
      * SHOW - show {{{singular}}}
      *
      * @param  integer $id  {{{singular}}}->id
-     * @return view         {{{plural}}}.show
+     * @return view         {{{kebab_plural}}}.show
      */
     public function show($id, Request $request)
     {
@@ -150,17 +150,17 @@ class {{{plural_uc}}}Controller extends Controller
                 trans('laravel-crud::alert.not-found', ['element' => '{{{singular_uc}}}'])
             );
 
-            return redirect('{{{plural}}}');
+            return redirect('{{{kebab_plural}}}');
         }
 
-        return view('{{{plural}}}.show', compact('{{{singular}}}'));
+        return view('{{{kebab_plural}}}.show', compact('{{{singular}}}'));
     }
 
     /**
      * DESTROY - delete {{{singular}}}
      *
      * @param  integer $id      {{{singular}}}->id
-     * @return redirect         {{{plural}}}.index
+     * @return redirect         {{{kebab_plural}}}.index
      */
     public function destroy($id, Request $request)
     {
@@ -181,7 +181,7 @@ class {{{plural_uc}}}Controller extends Controller
             );
         }
 
-        return redirect('{{{plural}}}');
+        return redirect('{{{kebab_plural}}}');
     }
 
     /**

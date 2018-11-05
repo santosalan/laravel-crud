@@ -74,7 +74,7 @@ class {{{plural_uc}}}Controller extends Controller
 
         $plucks = (array) $response->plucks;
 
-        return view('{{{plural}}}.index', compact('{{{plural}}}', 'filter', 'plucks'));
+        return view('{{{kebab_plural}}}.index', compact('{{{plural}}}', 'filter', 'plucks'));
     }
 
     /**
@@ -95,7 +95,7 @@ class {{{plural_uc}}}Controller extends Controller
 
         $plucks = (array) $response->plucks;
 
-        return view('{{{plural}}}.form', compact('plucks'));
+        return view('{{{kebab_plural}}}.form', compact('plucks'));
     }
 
     /**
@@ -134,7 +134,7 @@ class {{{plural_uc}}}Controller extends Controller
             return redirect()->back();
         }
 
-        return redirect('{{{plural}}}');
+        return redirect('{{{kebab_plural}}}');
     }
 
     /**
@@ -159,7 +159,7 @@ class {{{plural_uc}}}Controller extends Controller
                 trans('laravel-crud::alert.not-found', ['element' => '{{{singular_uc}}}'])
             );
 
-            return redirect('{{{plural}}}');
+            return redirect('{{{kebab_plural}}}');
         }
 
         ${{{singular}}} = (new {{{singular_uc}}})->fill(
@@ -177,7 +177,7 @@ class {{{plural_uc}}}Controller extends Controller
 
         $plucks = (array) $response->plucks;
 
-        return view('{{{plural}}}.form', compact('{{{singular}}}', 'plucks'));
+        return view('{{{kebab_plural}}}.form', compact('{{{singular}}}', 'plucks'));
     }
 
     /**
@@ -218,7 +218,7 @@ class {{{plural_uc}}}Controller extends Controller
         }
 
 
-        return redirect('{{{plural}}}');
+        return redirect('{{{kebab_plural}}}');
     }
 
     /**
@@ -243,14 +243,14 @@ class {{{plural_uc}}}Controller extends Controller
                 trans('laravel-crud::alert.not-found', ['element' => '{{{singular_uc}}}'])
             );
 
-            return redirect('{{{plural}}}');
+            return redirect('{{{kebab_plural}}}');
         }
 
         ${{{singular}}} = (new {{{singular_uc}}})->fill(
                         (array) $response->{{{singular}}}
                     );
 
-        return view('{{{plural}}}.show', compact('{{{singular}}}'));
+        return view('{{{kebab_plural}}}.show', compact('{{{singular}}}'));
     }
 
     /**
@@ -261,24 +261,44 @@ class {{{plural_uc}}}Controller extends Controller
      */
     public function destroy($id, Request $request)
     {
-        ${{{singular}}} = {{{singular_uc}}}::find($id);
+        try {
 
-        if (${{{singular}}}) {
-            ${{{singular}}}->delete();
+            $response = json_decode(
+                            (new CoreApiService)
+                                ->toJson()
+                                ->{{{plural}}}(
+                                    'DELETE',
+                                    [$id]
+                                )
+                        );
 
-            $request->session()->flash(
-                'msgSuccess',
-                trans('laravel-crud::alert.deleted', ['element' => '{{{singular_uc}}}'])
-            );
+            if ($response->status === 200) {
+                $request->session()->flash(
+                    'msgSuccess',
+                    trans('laravel-crud::alert.stored', ['element' => '{{{singular_uc}}}'])
+                );
+            } elseif ($response->status === 422) {
+                $request->session()->flash(
+                    'msgError',
+                    $response->errors
+                );
+            } elseif ($response->status === 404) {
+                $request->session()->flash(
+                    'msgError',
+                    trans('laravel-crud::alert.not-found', ['element' => '{{{singular_uc}}}'])
+                );
+            }
 
-        } else {
+        } catch (\Exception $e) {
             $request->session()->flash(
                 'msgError',
-                trans('laravel-crud::alert.not-found', ['element' => '{{{singular_uc}}}'])
+                $e->getMessage()
             );
+
+            return redirect()->back();
         }
 
-        return redirect('{{{plural}}}');
+        return redirect('{{{kebab_plural}}}');
     }
 
     /**

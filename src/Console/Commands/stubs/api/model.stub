@@ -14,7 +14,7 @@ class {{{singular_uc}}} extends Model
      *
      * @var string
      */
-    protected $table = '{{{plural}}}';
+    protected $table = '{{{table_name}}}';
 
     /**
      * The primary key for the model.

@@ -102,6 +102,7 @@ class CrudMakeCommand extends Command
                     $m = [
                         'plural_uc' => ucwords($table->plural),
                         'plural' => $table->plural,
+                        'kebab_plural' => kebab_case($table->plural),
                     ];
 
                     $temp = $template;
@@ -173,14 +174,23 @@ class CrudMakeCommand extends Command
                 continue;
             }
 
+            $prepareName = function ($name, $format) {
+                $name = explode('_', $name);
+                $name[count($name) - 1] = Pluralizer::{$format}(end($name));
+
+                return implode('_', $name);
+            };
+
             // Make the table object
             $objTab = new \stdClass();
             $objTab->name = $t->{'Tables_in_' . env('DB_DATABASE')};
             $objTab->relationTable = false;
-            $objTab->singular = Pluralizer::singular($objTab->name);
-            $objTab->plural = Pluralizer::plural($objTab->name);
+            $objTab->singular = camel_case($prepareName($objTab->name, 'singular'));
+            $objTab->plural = camel_case($prepareName($objTab->name, 'plural'));
+            $objTab->snakeSingular = snake_case($objTab->singular);
+            $objTab->snakePlural = snake_case($objTab->plural);
             $objTab->fieldDisplay = false;
-            $objTab->fk = $objTab->singular . '_id';
+            $objTab->fk = $objTab->snakeSingular . '_id';
             $objTab->fields = [];
             $objTab->belongsTo = [];
             $objTab->hasMany = [];
@@ -192,6 +202,8 @@ class CrudMakeCommand extends Command
 
             array_push($this->tables, $objTab);
         }
+
+        // dd($this->tables);
 
         // Register belongsToMany
         foreach ($this->tables as $table) {
@@ -232,7 +244,7 @@ class CrudMakeCommand extends Command
 
         }
 
-        //dump($this->tables);
+        // dd($this->tables);
 
 
         // Verify option TABLE
@@ -364,11 +376,11 @@ class CrudMakeCommand extends Command
 
         $displays = [
                         'name',
-                        $table->singular . '_name',
-                        'name_' . $table->singular,
+                        $table->snakeSingular . '_name',
+                        'name_' . $table->snakeSingular,
                         'title',
-                        $table->singular . '_title',
-                        'title_' . $table->singular,
+                        $table->snakeSingular . '_title',
+                        'title_' . $table->snakeSingular,
                         'username',
                         'user',
                         'login',
@@ -838,6 +850,7 @@ class CrudMakeCommand extends Command
 
                     $m = [
                         'plural' => $t->plural,
+                        'kebab_plural' => kebab_case($t->plural),
                         'singular_uc' => ucwords($t->singular),
                         'singular' => $t->singular,
                         'use_model' => $this->pathModels . ucwords($t->singular),
@@ -884,7 +897,7 @@ class CrudMakeCommand extends Command
                 <div class="col-xs-12 col-sm-6 col-md-4">
                     <div class="form-group">
                         <label for="' . $field->name . '" class="control-label">
-                            ' . $prepareTitle($t->singular) . '
+                            ' . $prepareTitle($t->snakeSingular) . '
                         </label>
                         {{ Form::select("' . $field->name . '", $plucks["' . $t->plural . '"], @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => ""]) }}
                     </div>
@@ -1003,7 +1016,7 @@ class CrudMakeCommand extends Command
                         foreach ($this->tables as $t) {
                             if ($t->name === $field->fk) {
                                 $fields .= '
-                            <th>' . title_case(str_replace('_',' ',$t->singular)) . '</th>';
+                            <th>' . title_case(str_replace('_',' ',$t->snakeSingular)) . '</th>';
                             }
                         }
                     } elseif (in_array($field->name, ['name', 'title', 'user', 'username', 'login', 'email', 'created_at', 'updated_at', 'deleted_at'])) {
@@ -1170,7 +1183,7 @@ class CrudMakeCommand extends Command
                                     if ($f->display) {
                                         $tmpFields = "
                         <tr>
-                            <th>" . title_case(str_replace('_',' ',$t->singular)) . "</th>
+                            <th>" . title_case(str_replace('_',' ',$t->snakeSingular)) . "</th>
                             <td>
                                 @if ($" . $objTable->singular . "->" . $t->singular .")
                                     {{ link_to_action('" . ucwords($t->plural) . "Controller@show', $" . $objTable->singular . "->" . $t->singular . '->' . $f->name . ", [$" . $objTable->singular . "->" . $field->name . "], ['class' => 'text-primary']) }}
@@ -1186,7 +1199,7 @@ class CrudMakeCommand extends Command
                                 } else {
                                     $fields .= "
                         <tr>
-                            <th>" . title_case(str_replace('_',' ',$t->singular)) . "</th>
+                            <th>" . title_case(str_replace('_',' ',$t->snakeSingular)) . "</th>
                             <td>
                                 @if ($" . $objTable->singular . "->" . $t->singular .")
                                     {{ link_to_action('" . ucwords($t->plural) . "Controller@show', $" . $objTable->singular . "->" . $field->name . ", [$" . $objTable->singular . "->" . $field->name . "], ['class' => 'text-primary']) }}
@@ -1239,10 +1252,14 @@ class CrudMakeCommand extends Command
         // MARKS TO REPLACE
         $marks = [
             // GERAL
+            'table_name' => $objTable->name,
             'plural_uc' => ucwords($objTable->plural),
             'plural' => $objTable->plural,
+            'kebab_plural' => kebab_case($objTable->plural),
+            'snake_plural' => $objTable->snakePlural,
             'singular_uc' => ucwords($objTable->singular),
             'singular' => $objTable->singular,
+            'snake_singular' => $objTable->snakeSingular,
 
             // Controller
             'uses' => $prepareUses(),
@@ -1297,6 +1314,7 @@ class CrudMakeCommand extends Command
             'controller' => [
                 'plural_uc',
                 'plural',
+                'kebab_plural',
                 'singular_uc',
                 'singular',
                 'uses',
@@ -1310,8 +1328,10 @@ class CrudMakeCommand extends Command
             ],
 
             'model' => [
+                'table_name',
                 'plural_uc',
                 'plural',
+                'snake_plural',
                 'singular_uc',
                 'singular',
                 'namespace',
@@ -1408,6 +1428,7 @@ class CrudMakeCommand extends Command
             ],
 
             'routes' => [
+                'kebab_plural',
                 'plural_uc',
                 'plural',
             ],
@@ -1470,9 +1491,9 @@ class CrudMakeCommand extends Command
         $paths = [
             'controller' => app_path() . '/Http/Controllers/',
             'model' => app_path() . '/' . implode('/',$pathModels),
-            'index.blade' => resource_path() . '/views/' . $objTable->plural . '/',
-            'form.blade' => resource_path() . '/views/' . $objTable->plural . '/' ,
-            'show.blade' => resource_path() . '/views/' . $objTable->plural . '/' ,
+            'index.blade' => resource_path() . '/views/' . kebab_case($objTable->plural) . '/',
+            'form.blade' => resource_path() . '/views/' . kebab_case($objTable->plural) . '/' ,
+            'show.blade' => resource_path() . '/views/' . kebab_case($objTable->plural) . '/' ,
         ];
 
         // Name Arq
