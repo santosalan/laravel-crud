@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 {{{uses}}}
 use App\Services\CoreApiService;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Validator;
 
 class {{{plural_uc}}}Controller extends Controller
@@ -30,43 +31,70 @@ class {{{plural_uc}}}Controller extends Controller
      */
     public function index(Request $request)
     {
-
         $r = $request->all();
+
+        $pagination = [
+            'page' => isset($r['page']) ? (int) $r['page'] : 1,
+            'limit' => (new {{{singular_uc}}})->getPerPage(),
+        ];
+
+        if (blank($request->session()->get('{{{kebab_plural}}}')['filter'])) {
+            $request->session()->put('{{{kebab_plural}}}', [
+                                        'filter' => [
+                                            'pagination' => $pagination,
+                                        ],
+                                    ]);
+        }
+
         if ($request->isMethod('POST')) {
 
             $filter = $this->prepareFilterSet($request);
 
-            $request->session()->put('{{{plural}}}', [
-                                        'filter' => array_filter($filter),
+            $request->session()->put('{{{kebab_plural}}}', [
+                                        'filter' => array_merge(
+                                            array_filter($filter), 
+                                            [
+                                                'pagination' => $pagination,
+                                            ]
+                                        ),
+                                    ]);
+
+        } elseif ($request->isMethod('GET')) {
+            $request->session()->put('{{{kebab_plural}}}', [
+                                        'filter' => array_merge(
+                                            $request->session()->get('{{{kebab_plural}}}')['filter'],
+                                            [
+                                                'pagination' => $pagination,
+                                            ]
+                                        ),
                                     ]);
         }
 
-        if (blank($request->session()->get('{{{plural}}}')['filter'])) {
-            $request->session()->put('{{{plural}}}', [
-                                        'filter' => []
-                                    ]);
-        }
-
-        $filter = $request->session()->get('{{{plural}}}')['filter'];
-
+        $filter = $request->session()->get('{{{kebab_plural}}}')['filter'];
         $f = $this->prepareFilters($filter);
 
         $response = json_decode(
                         (new CoreApiService)
                             ->toJson()
-                            ->{{{plural}}}(
+                            ->{'{{{kebab_plural}}}'}(
                                 'GET',
                                 [],
                                 $f
                             )
                     );
 
-        ${{{plural}}} = {{{singular_uc}}}::hydrate($response->{{{plural}}});
+        ${{{plural}}} = new LengthAwarePaginator(
+                            {{{singular_uc}}}::hydrate($response->{{{plural}}}->data), 
+                            $response->{{{plural}}}->total, 
+                            $response->{{{plural}}}->per_page, 
+                            $response->{{{plural}}}->current_page,
+                            ['path' => '{{{kebab_plural}}}']
+                        );
 
         $response = json_decode(
                         (new CoreApiService)
                             ->toJson()
-                            ->{{{plural}}}(
+                            ->{'{{{kebab_plural}}}'}(
                                 'GET',
                                 ['plucks']
                             )
@@ -87,7 +115,7 @@ class {{{plural_uc}}}Controller extends Controller
         $response = json_decode(
                         (new CoreApiService)
                             ->toJson()
-                            ->{{{plural}}}(
+                            ->{'{{{kebab_plural}}}'}(
                                 'GET',
                                 ['plucks']
                             )
@@ -111,7 +139,7 @@ class {{{plural_uc}}}Controller extends Controller
             $response = json_decode(
                             (new CoreApiService)
                                 ->toJson()
-                                ->{{{plural}}}(
+                                ->{'{{{kebab_plural}}}'}(
                                     'POST',
                                     ['create'],
                                     $request->all()
@@ -147,7 +175,7 @@ class {{{plural_uc}}}Controller extends Controller
     {
         $response = json_decode(
                         (new CoreApiService)
-                            ->{{{plural}}}(
+                            ->{'{{{kebab_plural}}}'}(
                                 'GET',
                                 [$id]
                             )
@@ -169,7 +197,7 @@ class {{{plural_uc}}}Controller extends Controller
         $response = json_decode(
                         (new CoreApiService)
                             ->toJson()
-                            ->{{{plural}}}(
+                            ->{'{{{kebab_plural}}}'}(
                                 'GET',
                                 ['plucks']
                             )
@@ -194,7 +222,7 @@ class {{{plural_uc}}}Controller extends Controller
             $response = json_decode(
                             (new CoreApiService)
                                 ->toJson()
-                                ->{{{plural}}}(
+                                ->{'{{{kebab_plural}}}'}(
                                     'PUT',
                                     [$id],
                                     $request->all()
@@ -231,7 +259,7 @@ class {{{plural_uc}}}Controller extends Controller
     {
         $response = json_decode(
                         (new CoreApiService)
-                            ->{{{plural}}}(
+                            ->{'{{{kebab_plural}}}'}(
                                 'GET',
                                 [$id]
                             )
@@ -266,7 +294,7 @@ class {{{plural_uc}}}Controller extends Controller
             $response = json_decode(
                             (new CoreApiService)
                                 ->toJson()
-                                ->{{{plural}}}(
+                                ->{'{{{kebab_plural}}}'}(
                                     'DELETE',
                                     [$id]
                                 )
@@ -328,6 +356,7 @@ class {{{plural_uc}}}Controller extends Controller
     {
         $filters = [
                 {{{filters}}}
+                'pagination' => $filter['pagination'],
             ];
 
         return array_filter($filters);

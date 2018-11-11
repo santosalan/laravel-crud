@@ -75,6 +75,12 @@
         {{ Form::close() }}
     </div>
 
+    <div class="row">
+        <div class="col-xs-12 text-center">
+            {{ ${{{plural}}}->links() }}
+        </div>
+    </div>
+
     <div class="box box-primary">
         <div class="box-body">
             <div class="table-responsive">
@@ -119,9 +125,11 @@
                 </table>
             </div>
         </div>
+    </div>
 
-        <div class="box-footer text-center">
-            {{-- {{ ${{{plural}}}->links() }} --}}
+    <div class="row">
+        <div class="col-xs-12 text-center">
+            {{ ${{{plural}}}->links() }}
         </div>
     </div>
 
@@ -229,8 +237,3 @@
     </script>
 
 @endsection
-
-
-
-
-

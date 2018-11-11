@@ -33,18 +33,18 @@ class {{{plural_uc}}}Controller extends Controller
 
             $filter = $this->prepareFilterSet($request);
 
-            $request->session()->put('{{{plural}}}', [
+            $request->session()->put('{{{kebab_plural}}}', [
                                         'filter' => array_filter($filter),
                                     ]);
         }
 
-        if (blank($request->session()->get('{{{plural}}}')['filter'])) {
-            $request->session()->put('{{{plural}}}', [
+        if (blank($request->session()->get('{{{kebab_plural}}}')['filter'])) {
+            $request->session()->put('{{{kebab_plural}}}', [
                                         'filter' => []
                                     ]);
         }
 
-        $filter = $request->session()->get('{{{plural}}}')['filter'];
+        $filter = $request->session()->get('{{{kebab_plural}}}')['filter'];
 
         $f = $this->prepareFilters($filter);
 
