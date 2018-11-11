@@ -31,7 +31,7 @@ class CrudMakeCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Create a CRUD';
+    protected $description = 'Create a CRUD or API Client to Lumen-CRUD';
 
     /**
      * The path of Models
@@ -357,9 +357,16 @@ class CrudMakeCommand extends Command
         preg_match('/[0-9]+/', $field->Type, $size);
         preg_match('/([a-zA-Z_0-9]+)_id/', $field->Field, $fk2);
 
+        $types = null;
+        if ($type[0] === 'enum') {
+            // dump($field->Type);
+            preg_match('/\([\'0-9,a-zA-Z]+\)/', $field->Type, $types);
+            $types = str_replace(['(', "'",')'], '', $types[0]);
+        }
 
         $objField->name = $field->Field;
         $objField->type = $type[0];
+        $objField->inTypes = $types;
         $objField->size = isset($size[0]) ? $size[0] : null;
         $objField->unsigned = strpos($field->Type, 'unsigned') !== false ? true : false;
         $objField->required = $field->Null === 'NO' ? true : false;
@@ -413,6 +420,7 @@ class CrudMakeCommand extends Command
                 case 'char':
                 case 'varchar':
                 case 'text':
+                case 'enum':
                     $type = 'string';
                     break;
 
@@ -423,12 +431,20 @@ class CrudMakeCommand extends Command
             return $type;
         };
 
+        // Get PK name
+        foreach ($table->fields as $f) {
+            if ($f->pk) {
+                $pk = $f->name;
+            }
+        }
+
         $validator = $funcType();
+        $validator .= $objField->type === 'enum' ? '|in:' . $objField->inTypes : '';
         $validator .= $objField->size && in_array($objField->type, ['char','varchar','text'])
                         ? '|max:' . $objField->size
                         : '';
         $validator .= strpos($objField->name, 'email') !== false ? '|email' : '';
-        $validator .= $objField->unique ? '|unique:' . $table->name : '';
+        $validator .= $objField->unique ? '|unique:' . $table->name . ',' . $pk : '';
         $validator .= $objField->required ? '|required' : '';
 
         return $validator;
@@ -453,6 +469,7 @@ class CrudMakeCommand extends Command
                 case 'char':
                 case 'varchar':
                 case 'text':
+                case 'enum':
                     $type = 'string';
                     break;
 
@@ -513,6 +530,7 @@ class CrudMakeCommand extends Command
                 case 'char':
                 case 'varchar':
                 case 'text':
+                case 'enum':
                     $type = 'string';
                     break;
 
