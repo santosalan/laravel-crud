@@ -57,7 +57,7 @@ public function boot()
 }
 ```
 
-### Configure the app/Services/CoreApiService.php with data of the system core Lumen CRUD Server
+### If make crud the API Client configure the _app/Services/CoreApiService.php_ with data of the system core Lumen CRUD Server
 
 
 **Caution: All files will be replaced**
