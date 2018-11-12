@@ -26,6 +26,36 @@ or
 ## Publish Provider
 > php artisan vendor:publish --provider 'SantosAlan\LaravelCrud\ServiceProvider'
 
+## Doctrine Inflectors - Irregular Plural and Singular 
+#### Add it in _config/app.php_
+```php
+/**
+ * Irregulares Words
+ */
+'doctrine-inflector' => [
+    'plural' => [
+        'irregular' => [
+            'traducao' => 'traducoes',
+        ],
+    ],
+
+    'singular' => [
+        'irregular' => [
+            'traducoes' => 'traducao',
+        ],
+    ],
+],
+```
+
+#### Add it in _app/Providers/AppServiceProvider.php_
+```php
+public function boot()
+{
+    // Doctrine Irregular Rules
+    Inflector::rules('plural', config('app.doctrine-inflector.plural'));
+    Inflector::rules('singular', config('app.doctrine-inflector.singular'));
+}
+```
 
 ### Configure the app/Services/CoreApiService.php with data of the system core Lumen CRUD Server
 
