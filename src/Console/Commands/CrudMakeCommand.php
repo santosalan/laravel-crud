@@ -635,9 +635,17 @@ class CrudMakeCommand extends Command
 
         // USES
         $prepareUses = function () use ($objTable) {
+
+            $prepareName = function ($name, $format) {
+                $name = explode('_', $name);
+                $name[count($name) - 1] = Pluralizer::{$format}(end($name));
+
+                return implode('_', $name);
+            };
+
             $uses = 'use ' . $this->pathModels . ucwords($objTable->singular) . ";\n";
             foreach ($objTable->belongsTo as $b) {
-                $uses .= 'use ' . $this->pathModels . ucwords(Pluralizer::singular($b)) . ";\n";
+                $uses .= 'use ' . $this->pathModels . studly_case($prepareName($b, 'singular')) . ";\n";
             }
 
             return $uses;
