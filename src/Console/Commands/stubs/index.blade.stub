@@ -28,7 +28,7 @@
 
     <div class="page-header">
         <h1>{{{plural_uc}}}</h1>
-        <a href="{{ URL::to('{{{plural}}}/create') }}" class="btn btn-success" data-toggle="tooltip" data-placement="top" title="{{ trans('laravel-crud::view.btn-create') }}">
+        <a href="{{ URL::to('{{{kebab_plural}}}/create') }}" class="btn btn-success" data-toggle="tooltip" data-placement="top" title="{{ trans('laravel-crud::view.btn-create') }}">
             <i class="fa fa-plus"></i> <span class="hidden-xs">{{ trans('laravel-crud::view.btn-create') }}</span>
         </a>
     </div>
@@ -90,14 +90,14 @@
                             <tr>
                                 {{{value_fields}}}
                                 <td class="actions btn-group-sm">
-                                    {{ link_to('{{{plural}}}/' . ${{{singular}}}->{{{primary_key}}},'',
+                                    {{ link_to('{{{kebab_plural}}}/' . ${{{singular}}}->{{{primary_key}}},'',
                                                 ['class' => 'btn btn-info fa fa-eye',
                                                  'data-toggle' => 'tooltip',
                                                  'data-placement' => 'top',
                                                  'title' => trans('laravel-crud::view.btn-show')],
                                                 false) }}
 
-                                    {{ link_to('{{{plural}}}/' . ${{{singular}}}->{{{primary_key}}} . '/edit','',
+                                    {{ link_to('{{{kebab_plural}}}/' . ${{{singular}}}->{{{primary_key}}} . '/edit','',
                                                 ['class' => 'btn btn-warning fa fa-pencil',
                                                  'data-toggle' => 'tooltip',
                                                  'data-placement' => 'top',

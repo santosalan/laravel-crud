@@ -3,23 +3,23 @@
 @section('title', env('APP_NAME') . ' - {{{plural_uc}}}')
 
 @section('content_header')
-    
+
     <div class="page-header">
         <h1>{{{plural_uc}}} <small>{{ trans('laravel-crud::view.show') }}</small></h1>
 
-        <a href="{{ URL::to('{{{plural}}}') }}" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="{{ trans('laravel-crud::view.btn-list') }}">
+        <a href="{{ URL::to('{{{kebab_plural}}}') }}" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="{{ trans('laravel-crud::view.btn-list') }}">
             <i class="fa fa-list"></i> <span class="hidden-xs">{{ trans('laravel-crud::view.btn-list') }}</span>
         </a>
-        <a href="{{ URL::to('{{{plural}}}/create') }}" class="btn btn-success" data-toggle="tooltip" data-placement="top" title="{{ trans('laravel-crud::view.btn-create') }}">
+        <a href="{{ URL::to('{{{kebab_plural}}}/create') }}" class="btn btn-success" data-toggle="tooltip" data-placement="top" title="{{ trans('laravel-crud::view.btn-create') }}">
             <i class="fa fa-plus"></i> <span class="hidden-xs">{{ trans('laravel-crud::view.btn-create') }}</span>
         </a>
-        <a href="{{ URL::to('{{{plural}}}/' . ${{{singular}}}->id . '/edit') }}" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="{{ trans('laravel-crud::view.btn-edit') }}">
+        <a href="{{ URL::to('{{{kebab_plural}}}/' . ${{{singular}}}->id . '/edit') }}" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="{{ trans('laravel-crud::view.btn-edit') }}">
             <i class="fa fa-pencil"></i> <span class="hidden-xs">{{ trans('laravel-crud::view.btn-edit') }}</span>
         </a>
-        
-        {{ Form::model(${{{singular}}}, 
-            ['method' => 'delete', 
-             'action' => ['{{{plural_uc}}}Controller@destroy', ${{{singular}}}->id], 
+
+        {{ Form::model(${{{singular}}},
+            ['method' => 'delete',
+             'action' => ['{{{plural_uc}}}Controller@destroy', ${{{singular}}}->id],
              'class' => 'form-inline form-delete',
              'style' => 'display: inline;']) }}
             {{ Form::hidden('id', ${{{singular}}}->id) }}
@@ -28,8 +28,8 @@
             </button>
         {{ Form::close() }}
     </div>
-        
-    
+
+
 @endsection
 
 
@@ -52,7 +52,7 @@
     @endif
 
 
-    <div class="box box-info"> 
+    <div class="box box-info">
         <div class="box-header">
             <h3>{{ {{{display_field}}} }}</h3>
         </div>
@@ -75,7 +75,7 @@
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h3 class="modal-title" id="myModalLabel">
-                <i class="fa fa-exclamation fa-2x text-red"></i>  
+                <i class="fa fa-exclamation fa-2x text-red"></i>
                 {{ trans('laravel-crud::alert.you-sure') }}
             </h3>
           </div>
@@ -89,7 +89,7 @@
         </div>
       </div>
     </div>
-@endsection    
+@endsection
 
 
 @section('js')
