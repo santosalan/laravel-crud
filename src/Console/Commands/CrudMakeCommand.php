@@ -505,7 +505,7 @@ class CrudMakeCommand extends Command
 
 
             default:
-                    $filter = "'" . $objField->name . "' => \$r['" . $objField->name . "']";
+                    $filter = "'" . $objField->name . "' => isset(\$r['" . $objField->name . "']) ? \$r['" . $objField->name . "'] : null";
                     break;
         }
 
