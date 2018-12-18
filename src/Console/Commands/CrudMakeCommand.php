@@ -1428,6 +1428,7 @@ class CrudMakeCommand extends Command
             'index.blade' => [
                 'plural_uc',
                 'plural',
+                'kebab_plural',
                 'singular_uc',
                 'singular',
                 'filters_fields',
@@ -1439,6 +1440,7 @@ class CrudMakeCommand extends Command
             'form.blade' => [
                 'plural_uc',
                 'plural',
+                'kebab_plural',
                 'singular_uc',
                 'singular',
                 'form_fields',
@@ -1448,6 +1450,7 @@ class CrudMakeCommand extends Command
             'show.blade' => [
                 'plural_uc',
                 'plural',
+                'kebab_plural',
                 'singular_uc',
                 'singular',
                 'display_field',
