@@ -41,18 +41,18 @@ public function boot()
 > php artisan make:crud
 
 ## Generate a Basic Laravel-CRUD examples
-> php artisan make:crud --tables [ all | table_number ] --path-models 'App\Models\' --routes [ y | n ]
+> php artisan make:crud --tables [ all | table_number ] --path-models 'App\Models\' --routes [ y | n ] --theme [1=AdminLTE | 2=Porto Admin]
 
 or
 
-> php artisan make:crud -t [ all | table_number ] -p 'App\Models\' -r [ y | n ]
+> php artisan make:crud -t [ all | table_number ] -p 'App\Models\' -r [ y | n ] -T [1=AdminLTE | 2=Porto Admin]
 
 ## Generate a Basic Laravel-CRUD API Client to santosalan/lumen-crud core
 > php artisan make:crud --tables [ all | table_number ] --path-models 'App\Models\' --routes [ y | n ] --api-client Y
 
 or
 
-> php artisan make:crud -t [ all | table_number ] -p 'App\Models\' -r [ y | n ] -a Y 
+> php artisan make:crud -t [ all | table_number ] -p 'App\Models\' -r [ y | n ] -a Y
 
 ## Publish Provider
 > php artisan vendor:publish --provider 'SantosAlan\LaravelCrud\ServiceProvider'
@@ -61,5 +61,4 @@ or
 
 
 **Caution: All files will be replaced**
-    
 
