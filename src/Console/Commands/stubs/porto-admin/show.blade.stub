@@ -1,0 +1,110 @@
+@extends('layouts.portoadmin.page')
+
+@section('title', env('APP_NAME') . ' - {{{plural_uc}}}')
+
+@section('page_title')
+    <h2>{{{plural_uc}}} <small>{{ trans('laravel-crud::view.show') }}</small></h2>
+@endsection
+
+@section('content_header')
+    <a href="{{ URL::to('{{{kebab_plural}}}') }}" class="btn btn-primary mr-1" role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top" title="{{ trans('laravel-crud::view.btn-list') }}">
+        <i class="fa fa-list"></i> <span class="hidden-xs">{{ trans('laravel-crud::view.btn-list') }}</span>
+    </a>
+    <a href="{{ URL::to('{{{kebab_plural}}}/create') }}" class="btn btn-success mr-1" role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top" title="{{ trans('laravel-crud::view.btn-create') }}">
+        <i class="fa fa-plus"></i> <span class="hidden-xs">{{ trans('laravel-crud::view.btn-create') }}</span>
+    </a>
+    <a href="{{ URL::to('{{{kebab_plural}}}/' . ${{{singular}}}->id . '/edit') }}" class="btn btn-warning mr-1" role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top" title="{{ trans('laravel-crud::view.btn-edit') }}">
+        <i class="fa fa-pencil"></i> <span class="hidden-xs">{{ trans('laravel-crud::view.btn-edit') }}</span>
+    </a>
+
+    {{ Form::model(${{{singular}}},
+        ['method' => 'delete',
+         'action' => ['{{{plural_uc}}}Controller@destroy', ${{{singular}}}->id],
+         'class' => 'form-inline form-delete',
+         'style' => 'display: inline;']) }}
+        {{ Form::hidden('id', ${{{singular}}}->id) }}
+        <button class="btn btn-danger form-delete" data-toggle="tooltip" data-placement="top" title="{{ trans('laravel-crud::view.btn-delete') }}">
+            <i class="fa fa-remove"></i> <span class="hidden-xs">{{ trans('laravel-crud::view.btn-delete') }}</span>
+        </button>
+    {{ Form::close() }}
+@endsection
+
+
+@section('content')
+
+    @if (Session::has('msgSuccess'))
+        <div class="alert alert-success alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            {{ Session::get('msgSuccess') }}
+        </div>
+    @elseif (Session::has('msgError'))
+        <div class="alert alert-error alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            {{ Session::get('msgError') }}
+        </div>
+    @endif
+
+    <div class="col-12">
+        <div class="card card-featured card-featured-info">
+            <div class="card-header">
+                <h3>{{ {{{display_field}}} }}</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover vertical-table" cellspacing="0" cellpadding="0">
+                        <tbody>
+                            {{{show_fields}}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header bg-danger">
+            <h3 class="modal-title" id="myModalLabel">
+                <i class="fa fa-exclamation fa-2x"></i>
+                {{ trans('laravel-crud::alert.you-sure') }}
+            </h3>
+            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          </div>
+          <div class="modal-body">
+            <h4>{{ trans('laravel-crud::alert.once-deleted') }}</h4>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('laravel-crud::view.btn-cancel') }}</button>
+            <button type="button" class="btn btn-danger delete-btn">{{ trans('laravel-crud::view.btn-confirm') }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+@endsection
+
+
+@section('js')
+
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+
+            $('div').on('click', '.form-delete', function(e){
+                e.preventDefault();
+                var $form=$(this);
+                $('#deleteModal').modal({ backdrop: 'static', keyboard: false })
+                    .on('click', '.delete-btn', function(){
+                        $form.submit();
+                    });
+            });
+        })
+    </script>
+
+@endsection

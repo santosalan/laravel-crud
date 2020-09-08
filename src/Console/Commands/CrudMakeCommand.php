@@ -5,6 +5,7 @@ namespace SantosAlan\LaravelCrud\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Pluralizer;
+use Illuminate\Support\Str;
 
 class CrudMakeCommand extends Command
 {
@@ -24,7 +25,8 @@ class CrudMakeCommand extends Command
                             {--t|table= : [all | table number] }
                             {--p|path-models=App : Namespace to Models (Directories will be created) }
                             {--r|routes=Y : [Y | N] }
-                            {--a|api-client=N : [Y | N] (Api client to System Core generated with santosalan/lumen-crud})';
+                            {--a|api-client=N : [Y | N] (Api client to System Core generated with santosalan/lumen-crud)}
+                            {--T|theme=1 : [1 = AdminLTE | 2 = Porto Admin] (Put the theme files in an exclusive folder inside public / vendor... If the theme is not free, an authorized copy of the theme is required... We will not deliver copies of themes that are not free. Any unauthorized copy is your complete responsibility.)}';
 
     /**
      * The console command description.
@@ -51,6 +53,12 @@ class CrudMakeCommand extends Command
      * @var boolean
      */
     private $apiLumen = false;
+
+    /**
+     * [$theme 1=AdminLTE | 2=Porto Admin]
+     * @var integer
+     */
+    private $theme = 1;
 
     /**
      * [$tables description]
@@ -102,7 +110,7 @@ class CrudMakeCommand extends Command
                     $m = [
                         'plural_uc' => ucwords($table->plural),
                         'plural' => $table->plural,
-                        'kebab_plural' => kebab_case($table->plural),
+                        'kebab_plural' => Str::kebab($table->plural),
                     ];
 
                     $temp = $template;
@@ -124,7 +132,7 @@ class CrudMakeCommand extends Command
                 $m = [
                     'plural_uc' => ucwords($table->plural),
                     'plural' => $table->plural,
-                    'kebab_plural' => kebab_case($table->plural),
+                    'kebab_plural' => Str::kebab($table->plural),
                 ];
 
                 $temp = $template;
@@ -153,7 +161,7 @@ class CrudMakeCommand extends Command
 
         // Verify option TABLE
         if (trim($this->option('path-models')) !== '') {
-            $this->pathModels = str_finish($this->option('path-models'), '\\');
+            $this->pathModels = Str::finish($this->option('path-models'), '\\');
         }
 
     }
@@ -186,10 +194,10 @@ class CrudMakeCommand extends Command
             $objTab = new \stdClass();
             $objTab->name = $t->{'Tables_in_' . env('DB_DATABASE')};
             $objTab->relationTable = false;
-            $objTab->singular = camel_case($prepareName($objTab->name, 'singular'));
-            $objTab->plural = camel_case($prepareName($objTab->name, 'plural'));
-            $objTab->snakeSingular = snake_case($objTab->singular);
-            $objTab->snakePlural = snake_case($objTab->plural);
+            $objTab->singular = Str::camel($prepareName($objTab->name, 'singular'));
+            $objTab->plural = Str::camel($prepareName($objTab->name, 'plural'));
+            $objTab->snakeSingular = Str::snake($objTab->singular);
+            $objTab->snakePlural = Str::snake($objTab->plural);
             $objTab->fieldDisplay = false;
             $objTab->fk = $objTab->snakeSingular . '_id';
             $objTab->fields = [];
@@ -306,13 +314,47 @@ class CrudMakeCommand extends Command
     {
         $this->alert('API CLIENT PROCESS');
 
-        // Verify option TABLE
+        // Verify option API CLIENT
         if (!in_array(strtoupper(trim($this->option('api-client'))), ['N','NO','FALSE'])) {
             $this->apiLumen = true;
         }
 
     }
 
+    /**
+     * [processOptionTheme description]
+     * @return [type] [description]
+     */
+    public function processOptionTheme()
+    {
+        $this->alert('THEME PROCESS');
+
+        // Verify option THEME
+        if (in_array(trim($this->option('theme')), [1, 2])) {
+            $this->theme = $this->option('theme');
+        }
+
+    }
+
+    /**
+     * [themeDir description]
+     * @return string
+     */
+    private function themeDir()
+    {
+        $dir = 'adminlte';
+
+        switch($this->theme) {
+            case 1: $dir = 'adminlte'; break;
+            case 2: $dir = 'porto-admin'; break;
+            default: $dir = 'adminlte';
+        }
+
+        // dump($this->theme);
+        // dump($dir);
+
+        return $dir;
+    }
 
     /**
      * [readTable description]
@@ -584,7 +626,16 @@ class CrudMakeCommand extends Command
         if ($this->apiLumen) {
             $template = file_get_contents(__DIR__ . '/stubs/api/' . $type . '.stub');
         } else {
-            $template = file_get_contents(__DIR__ . '/stubs/' . $type . '.stub');
+            switch($type) {
+                case 'index.blade':
+                case 'form.blade':
+                case 'show.blade':
+                    $template = file_get_contents(__DIR__ . '/stubs/' . $this->themeDir() . '/' . $type . '.stub');
+                    break;
+
+                default:
+                    $template = file_get_contents(__DIR__ . '/stubs/' . $type . '.stub');
+            }
         }
 
         if ($template === false) {
@@ -645,7 +696,7 @@ class CrudMakeCommand extends Command
 
             $uses = 'use ' . $this->pathModels . ucwords($objTable->singular) . ";\n";
             foreach ($objTable->belongsTo as $b) {
-                $uses .= 'use ' . $this->pathModels . studly_case($prepareName($b, 'singular')) . ";\n";
+                $uses .= 'use ' . $this->pathModels . Str::studly($prepareName($b, 'singular')) . ";\n";
             }
 
             return $uses;
@@ -877,7 +928,7 @@ class CrudMakeCommand extends Command
 
                     $m = [
                         'plural' => $t->plural,
-                        'kebab_plural' => kebab_case($t->plural),
+                        'kebab_plural' => Str::kebab($t->plural),
                         'singular_uc' => ucwords($t->singular),
                         'singular' => $t->singular,
                         'use_model' => $this->pathModels . ucwords($t->singular),
@@ -904,7 +955,7 @@ class CrudMakeCommand extends Command
             if (in_array($field, ['name', 'title', 'user', 'username', 'login', 'email', 'created_at', 'updated_at', 'deleted_at'])) {
                 $title = "{{ trans('laravel-crud::view." . str_replace('_', '-', $field) . "') }}";
             } else {
-                $title = title_case(str_replace('_', ' ', $field));
+                $title = Str::title(str_replace('_', ' ', $field));
             }
 
             return $title;
@@ -921,8 +972,8 @@ class CrudMakeCommand extends Command
                         foreach ($this->tables as $t) {
                             if ($t->name === $field->fk) {
                                 $fields .= '
-                <div class="col-xs-12 col-sm-6 col-md-4">
-                    <div class="form-group">
+                <div class="col-xs-12 col-12 col-sm-6 col-md-4">
+                    <div class="form-group mb-3">
                         <label for="' . $field->name . '" class="control-label">
                             ' . $prepareTitle($t->snakeSingular) . '
                         </label>
@@ -934,8 +985,8 @@ class CrudMakeCommand extends Command
                         }
                     } elseif (in_array($field->type, ['date', 'datetime', 'time', 'timestamp'])) {
                         $fields .= '
-                <div class="col-xs-12 col-sm-6 col-md-4">
-                    <div class="form-group">
+                <div class="col-xs-12 col-12 col-sm-6 col-md-4">
+                    <div class="form-group mb-3">
                         <label for="' . $field->name . '" class="control-label">
                             ' . $prepareTitle($field->name) . '
                             <select name="' . $field->name . '-options" id="' . $field->name . '-options" class="pull-right select-options" data-field="' . $field->name . '">
@@ -948,7 +999,7 @@ class CrudMakeCommand extends Command
                             </select>
                         </label>
                         <div id="' . $field->name . '-options-1">
-                            {{ Form::'. ($field->type == 'time' ? 'time' : 'date') . '("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "id" => "' . $field->name . '", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
+                            {{ Form::'. ($field->type == 'time' ? 'time' : 'date') . '("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "id" => "' . $field->name . '", "placeholder" => "' . Str::title(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
                         </div>
                         <div id="' . $field->name . '-options-2" style="display:none;">
                             <div class="row">
@@ -965,8 +1016,8 @@ class CrudMakeCommand extends Command
 
                     } elseif ($field->type === 'int') {
                         $fields .= '
-                <div class="col-xs-12 col-sm-6 col-md-4">
-                    <div class="form-group">
+                <div class="col-xs-12 col-12 col-sm-6 col-md-4">
+                    <div class="form-group mb-3">
                         <label for="' . $field->name . '" class="control-label">
                             ' . $prepareTitle($field->name) . '
                             <select name="' . $field->name . '-options" id="' . $field->name . '-options" class="pull-right select-options" data-field="' . $field->name . '">
@@ -979,7 +1030,7 @@ class CrudMakeCommand extends Command
                             </select>
                         </label>
                         <div id="' . $field->name . '-options-1">
-                            {{ Form::number("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "id" => "' . $field->name . '", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
+                            {{ Form::number("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "id" => "' . $field->name . '", "placeholder" => "' . Str::title(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
                         </div>
                         <div id="' . $field->name . '-options-2" style="display:none;">
                             <div class="row">
@@ -996,8 +1047,8 @@ class CrudMakeCommand extends Command
 
                     } elseif ($field->name === 'email') {
                         $fields .= '
-                <div class="col-xs-12 col-sm-6 col-md-4">
-                    <div class="form-group">
+                <div class="col-xs-12 col-12 col-sm-6 col-md-4">
+                    <div class="form-group mb-3">
                         <label for="' . $field->name . '" class="control-label">
                             ' . $prepareTitle($field->name) . '
                         </label>
@@ -1007,8 +1058,8 @@ class CrudMakeCommand extends Command
 
                     } elseif (in_array($field->name, ['name', 'title', 'user', 'username', 'login'])) {
                         $fields .= '
-                <div class="col-xs-12 col-sm-6 col-md-4">
-                    <div class="form-group">
+                <div class="col-xs-12 col-12 col-sm-6 col-md-4">
+                    <div class="form-group mb-3">
                         <label for="' . $field->name . '" class="control-label">
                             ' . $prepareTitle($field->name) . '
                         </label>
@@ -1017,12 +1068,12 @@ class CrudMakeCommand extends Command
                 </div>' . "\n";
                     } else {
                         $fields .= '
-                <div class="col-xs-12 col-sm-6 col-md-4">
-                    <div class="form-group">
+                <div class="col-xs-12 col-12 col-sm-6 col-md-4">
+                    <div class="form-group mb-3">
                         <label for="' . $field->name . '" class="control-label">
                             ' . $prepareTitle($field->name) . '
                         </label>
-                        {{ Form::text("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
+                        {{ Form::text("' . $field->name . '", @$filter["' . $field->name .'"], ["class" => "form-control", "placeholder" => "' . Str::title(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ']) }}
                     </div>
                 </div>' . "\n";
                     }
@@ -1043,7 +1094,7 @@ class CrudMakeCommand extends Command
                         foreach ($this->tables as $t) {
                             if ($t->name === $field->fk) {
                                 $fields .= '
-                            <th>' . title_case(str_replace('_',' ',$t->snakeSingular)) . '</th>';
+                            <th>' . Str::title(str_replace('_',' ',$t->snakeSingular)) . '</th>';
                             }
                         }
                     } elseif (in_array($field->name, ['name', 'title', 'user', 'username', 'login', 'email', 'created_at', 'updated_at', 'deleted_at'])) {
@@ -1051,7 +1102,7 @@ class CrudMakeCommand extends Command
                             <th>{{ trans(\'laravel-crud::view.' . str_replace('_', '-', $field->name) . '\') }}</th>';
                     } else {
                         $fields .= '
-                            <th>' . title_case(str_replace('_', ' ', $field->name)) . '</th>';
+                            <th>' . Str::title(str_replace('_', ' ', $field->name)) . '</th>';
                     }
                 }
             }
@@ -1125,8 +1176,8 @@ class CrudMakeCommand extends Command
                         foreach ($this->tables as $t) {
                             if ($t->name === $field->fk) {
                                 $fields .= '
-                    <div class="col-xs-12">
-                        {{ Form::label("' . $field->name . '", "' . title_case(str_replace('_',' ',$t->singular)) . '", ["class" => "control-label"]) }}
+                    <div class="col-xs-12 col-12 mb-3">
+                        {{ Form::label("' . $field->name . '", "' . Str::title(str_replace('_',' ',$t->singular)) . '", ["class" => "control-label"]) }}
                         {{ Form::select("' . $field->name . '", $plucks["' . $t->plural . '"], @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => ""' . ( $field->required ? ', "required"' : '' ) . ']) }}
                     </div>' . "\n";
 
@@ -1134,28 +1185,28 @@ class CrudMakeCommand extends Command
                         }
                     } elseif ($field->type === 'date') {
                         $fields .= '
-                    <div class="col-xs-12">
-                        {{ Form::label("' . $field->name . '", "' . title_case(str_replace('_', ' ', $field->name)) . '", ["class" => "control-label"]) }}
-                        {{ Form::date("' . $field->name . '", @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
+                    <div class="col-xs-12 col-12 mb-3">
+                        {{ Form::label("' . $field->name . '", "' . Str::title(str_replace('_', ' ', $field->name)) . '", ["class" => "control-label"]) }}
+                        {{ Form::date("' . $field->name . '", @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => "' . Str::title(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
                     </div>' . "\n";
 
                     } elseif (in_array($field->type, ['datetime', 'timestamp'])) {
                         $fields .= '
-                    <div class="col-xs-12">
-                        {{ Form::label("' . $field->name . '", "' . title_case(str_replace('_', ' ', $field->name)) . '", ["class" => "control-label"]) }}
-                        {{ Form::datetime("' . $field->name . '", @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
+                    <div class="col-xs-12 col-12 mb-3">
+                        {{ Form::label("' . $field->name . '", "' . Str::title(str_replace('_', ' ', $field->name)) . '", ["class" => "control-label"]) }}
+                        {{ Form::datetime("' . $field->name . '", @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => "' . Str::title(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
                     </div>' . "\n";
 
                     } elseif ($field->type === 'int') {
                         $fields .= '
-                    <div class="col-xs-12">
-                        {{ Form::label("' . $field->name . '", "' . title_case(str_replace('_', ' ', $field->name)) . '", ["class" => "control-label"]) }}
-                        {{ Form::number("' . $field->name . '", @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
+                    <div class="col-xs-12 col-12 mb-3">
+                        {{ Form::label("' . $field->name . '", "' . Str::title(str_replace('_', ' ', $field->name)) . '", ["class" => "control-label"]) }}
+                        {{ Form::number("' . $field->name . '", @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => "' . Str::title(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
                     </div>' . "\n";
 
                     } elseif ($field->name === 'email') {
                         $fields .= '
-                    <div class="col-xs-12">
+                    <div class="col-xs-12 col-12 mb-3">
                         {{ Form::label("' . $field->name . '", trans(\'laravel-crud::view.email\'), ["class" => "control-label"]) }}
                         {{ Form::email("' . $field->name . '", @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => trans(\'laravel-crud::view.email\')' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
                     </div>' . "\n";
@@ -1164,7 +1215,7 @@ class CrudMakeCommand extends Command
 
                         $fields .= '
                     @if (Request::is(\'*/create\'))
-                    <div class="col-xs-12">
+                    <div class="col-xs-12 col-12 mb-3">
                         {{ Form::label("' . $field->name . '", trans(\'laravel-crud::view.password\'), ["class" => "control-label"]) }}
                         {{ Form::password("' . $field->name . '", ["class" => "form-control", "placeholder" => trans(\'laravel-crud::view.password\')' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
                     </div>
@@ -1172,15 +1223,15 @@ class CrudMakeCommand extends Command
 
                     } elseif (in_array($field->name, ['name', 'title', 'user', 'username', 'login'])) {
                         $fields .= '
-                    <div class="col-xs-12">
+                    <div class="col-xs-12 col-12 mb-3">
                         {{ Form::label("' . $field->name . '", trans(\'laravel-crud::view.' . $field->name . '\'), ["class" => "control-label"]) }}
                         {{ Form::text("' . $field->name . '", @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => trans(\'laravel-crud::view.' . $field->name . '\')' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
                     </div>' . "\n";
                     } else {
                         $fields .= '
-                    <div class="col-xs-12">
-                        {{ Form::label("' . $field->name . '", "' . title_case(str_replace('_', ' ', $field->name)) . '", ["class" => "control-label"]) }}
-                        {{ Form::text("' . $field->name . '", @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => "' . title_case(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
+                    <div class="col-xs-12 col-12 mb-3">
+                        {{ Form::label("' . $field->name . '", "' . Str::title(str_replace('_', ' ', $field->name)) . '", ["class" => "control-label"]) }}
+                        {{ Form::text("' . $field->name . '", @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => "' . Str::title(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
                     </div>' . "\n";
                     }
                 }
@@ -1210,7 +1261,7 @@ class CrudMakeCommand extends Command
                                     if ($f->display) {
                                         $tmpFields = "
                         <tr>
-                            <th>" . title_case(str_replace('_',' ',$t->snakeSingular)) . "</th>
+                            <th>" . Str::title(str_replace('_',' ',$t->snakeSingular)) . "</th>
                             <td>
                                 @if ($" . $objTable->singular . "->" . $t->singular .")
                                     {{ link_to_action('" . ucwords($t->plural) . "Controller@show', $" . $objTable->singular . "->" . $t->singular . '->' . $f->name . ", [$" . $objTable->singular . "->" . $field->name . "], ['class' => 'text-primary']) }}
@@ -1226,7 +1277,7 @@ class CrudMakeCommand extends Command
                                 } else {
                                     $fields .= "
                         <tr>
-                            <th>" . title_case(str_replace('_',' ',$t->snakeSingular)) . "</th>
+                            <th>" . Str::title(str_replace('_',' ',$t->snakeSingular)) . "</th>
                             <td>
                                 @if ($" . $objTable->singular . "->" . $t->singular .")
                                     {{ link_to_action('" . ucwords($t->plural) . "Controller@show', $" . $objTable->singular . "->" . $field->name . ", [$" . $objTable->singular . "->" . $field->name . "], ['class' => 'text-primary']) }}
@@ -1247,13 +1298,13 @@ class CrudMakeCommand extends Command
                     } elseif ($field->type === 'date') {
                         $fields .= '
                         <tr>
-                            <th>' . title_case(str_replace('_', ' ', $field->name)) . '</th>
+                            <th>' . Str::title(str_replace('_', ' ', $field->name)) . '</th>
                             <td>{{ blank($' . $objTable->singular . '->' . $field->name . ') ? null : @$' . $objTable->singular . '->' . $field->name . "->format('d/m/Y') }}</td>
                         </tr>";
                     } elseif (in_array($field->type, ['datetime', 'timestamp'])) {
                         $fields .= '
                         <tr>
-                            <th>' . title_case(str_replace('_', ' ', $field->name)) . '</th>
+                            <th>' . Str::title(str_replace('_', ' ', $field->name)) . '</th>
                             <td>{{ blank($' . $objTable->singular . '->' . $field->name . ') ? null : @$' . $objTable->singular . '->' . $field->name . "->format('d/m/Y H:i:s') }}</td>
                         </tr>";
                     } elseif(in_array($field->name, ['name', 'title', 'user', 'username', 'login', 'email'])) {
@@ -1265,7 +1316,7 @@ class CrudMakeCommand extends Command
                     } else {
                         $fields .= '
                         <tr>
-                            <th>' . title_case(str_replace('_', ' ', $field->name)) . '</th>
+                            <th>' . Str::title(str_replace('_', ' ', $field->name)) . '</th>
                             <td>{{ $' . $objTable->singular . '->' . $field->name . ' }}</td>
                         </tr>';
                     }
@@ -1282,7 +1333,7 @@ class CrudMakeCommand extends Command
             'table_name' => $objTable->name,
             'plural_uc' => ucwords($objTable->plural),
             'plural' => $objTable->plural,
-            'kebab_plural' => kebab_case($objTable->plural),
+            'kebab_plural' => Str::kebab($objTable->plural),
             'snake_plural' => $objTable->snakePlural,
             'singular_uc' => ucwords($objTable->singular),
             'singular' => $objTable->singular,
@@ -1521,9 +1572,9 @@ class CrudMakeCommand extends Command
         $paths = [
             'controller' => app_path() . '/Http/Controllers/',
             'model' => app_path() . '/' . implode('/',$pathModels),
-            'index.blade' => resource_path() . '/views/' . kebab_case($objTable->plural) . '/',
-            'form.blade' => resource_path() . '/views/' . kebab_case($objTable->plural) . '/' ,
-            'show.blade' => resource_path() . '/views/' . kebab_case($objTable->plural) . '/' ,
+            'index.blade' => resource_path() . '/views/' . Str::kebab($objTable->plural) . '/',
+            'form.blade' => resource_path() . '/views/' . Str::kebab($objTable->plural) . '/' ,
+            'show.blade' => resource_path() . '/views/' . Str::kebab($objTable->plural) . '/' ,
         ];
 
         // Name Arq
@@ -1560,6 +1611,9 @@ class CrudMakeCommand extends Command
      */
     public function handle()
     {
+
+        // Process Theme
+        $this->processOptionTheme();
 
         // Process Api Client
         $this->processOptionApiClient();

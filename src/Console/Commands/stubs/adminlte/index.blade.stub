@@ -59,7 +59,7 @@
                 <h4><i class="fa fa-search"></i> {{ trans('laravel-crud::view.filters') }}</h4>
             </div>
 
-            <div class="box-body">
+            <div class="box-body row">
                 {{{filters_fields}}}
             </div>
             <div class="box-footer">

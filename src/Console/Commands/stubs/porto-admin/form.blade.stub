@@ -1,0 +1,96 @@
+@extends('layouts.portoadmin.page')
+
+@section('title', env('APP_NAME') . ' - {{{plural_uc}}}')
+
+@section('css')
+
+    <style>
+        .form-control[required=""] {
+            border-color: #F00;
+        }
+    </style>
+
+@endsection
+
+@section('page_title')
+    <h2>{{{plural_uc}}} <small>@if (Request::is('*/create')) {{ trans('laravel-crud::view.create') }} @else {{ trans('laravel-crud::view.edit') }} @endif</small></h2>
+@endsection
+
+@section('content_header')
+
+    <a href="{{ URL::to('{{{kebab_plural}}}') }}" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="{{ trans('laravel-crud::view.btn-list') }}">
+        <i class="fa fa-list"></i> <span class="hidden-xs">{{ trans('laravel-crud::view.btn-list') }}</span>
+    </a>
+
+@endsection
+
+
+@section('content')
+
+    @if (Session::has('msgSuccess'))
+        <div class="col-12">
+            <div class="alert alert-success alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                {{ Session::get('msgSuccess') }}
+            </div>
+        </div>
+    @elseif (! empty($errors) && count($errors->all()))
+        <div class="col-12">
+            <div class="alert alert-error alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                @foreach ($errors->all() AS $e)
+                    <b>{{ $e }}</b><br/>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+    <div class="col-12">
+        @if (Request::is('*/create'))
+            <div class="card card-featured card-featured-success">
+                {{ Form::open(['action' => '{{{plural_uc}}}Controller@store', 'method' => 'POST']) }}
+        @else
+            <div class="card card-featured card-featured-warning">
+                {{ Form::model(${{{singular}}}, ['action' => ['{{{plural_uc}}}Controller@update', ${{{singular}}}->{{{primary_key}}}], 'method' => 'PATCH']) }}
+        @endif
+
+
+                <div class="card-body">
+                    <div class="form-group">
+
+                        {{{form_fields}}}
+
+                    </div>
+                </div>
+
+                <div class="clearfix"></div>
+
+                <div class="card-footer">
+                    <div class="form-group">
+                        <div class="col-12 text-right">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-save"></i> {{ trans('laravel-crud::view.btn-save') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            {{ Form::close() }}
+        </div>
+    </div>
+@endsection
+
+
+@section('js')
+
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        })
+    </script>
+
+@endsection

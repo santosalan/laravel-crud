@@ -9,14 +9,16 @@ use Illuminate\Contracts\Container\Container;
 use SantosAlan\LaravelCrud\Console\Commands\CrudMakeCommand;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
-class ServiceProvider extends BaseServiceProvider 
+class ServiceProvider extends BaseServiceProvider
 {
 
-    public function boot(Factory $view, Dispatcher $events, Repository $config) 
-    {     
+    public function boot(Factory $view, Dispatcher $events, Repository $config)
+    {
         $this->loadTranslations();
 
         $this->publishServices();
+
+        $this->publishViews();
 
         $this->registerCommands();
     }
@@ -30,6 +32,15 @@ class ServiceProvider extends BaseServiceProvider
         $this->publishes([
             $translationsPath => resource_path('lang/vendor/laravel-crud'),
         ], 'translations');
+    }
+
+    private function publishViews()
+    {
+        $layoutsPath = $this->packagePath('resources/views');
+
+        $this->publishes([
+            $layoutsPath => resource_path('views'),
+        ], 'views');
     }
 
     private function publishServices()
