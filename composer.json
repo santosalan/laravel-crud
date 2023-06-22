@@ -11,12 +11,10 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "php": ">=7.0.0",
-        "laravelcollective/html": ">=5.4.0",
-        "laravel/framework": ">=5.4",
-        "jeroennoten/laravel-adminlte": ">=1.22",
-        "santosalan/api-magic" : ">=0.0.4",
-        "santosalan/laravel-utils" : ">=0.0.3"
+        "php": ">=8.0.0",
+        "laravelcollective/html": ">=6.4.0",
+        "laravel/framework": ">=10.0",
+        "jeroennoten/laravel-adminlte": ">=3.9"
     },
     "autoload": {
         "psr-4": {
