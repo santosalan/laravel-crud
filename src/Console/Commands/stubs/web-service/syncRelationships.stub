@@ -1,0 +1,5 @@
+        // {{{plural_uc}}}
+        if (isset($data['{{{plural}}}'])) {
+            $this->{{{plural}}}()->sync($data['{{{plural}}}']);
+        }
+

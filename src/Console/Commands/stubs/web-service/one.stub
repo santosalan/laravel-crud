@@ -1,0 +1,10 @@
+    /**
+     * {{{singular_uc}}}
+     *
+     * @return {{{use_model}}}
+     */
+    public function {{{singular}}}()
+    {
+        return $this->hasOne('{{{use_model}}}', '{{{primary_model}}}', '{{{singular}}}_id');
+    }
+

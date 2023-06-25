@@ -1,0 +1,10 @@
+    /**
+     * {{{singular_uc}}}
+     *
+     * @return {{{use_model}}}
+     */
+    public function {{{singular}}}()
+    {
+        return $this->belongsTo('{{{use_model}}}', '{{{singular}}}_id', '{{{primary_model}}}');
+    }
+

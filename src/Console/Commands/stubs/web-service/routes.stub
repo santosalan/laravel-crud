@@ -1,0 +1,14 @@
+
+/**
+* {{{plural_uc}}}
+*/
+Route::group(['prefix' => '{{{kebab_plural}}}'], function () {
+    Route::group(['namespace' => 'App\Http\Controllers\Api'], function () {
+        Route::get('/', '{{{plural_uc}}}Controller@list');
+        Route::get('plucks', '{{{plural_uc}}}Controller@plucks');
+        Route::post('create', '{{{plural_uc}}}Controller@create');
+        Route::get('{id}', '{{{plural_uc}}}Controller@read');
+        Route::put('{id}', '{{{plural_uc}}}Controller@update');
+        Route::delete('{id}', '{{{plural_uc}}}Controller@delete');
+    });
+});

@@ -1,0 +1,1 @@
+            '{{{plural}}}' => self::{{{plural}}}()->get()->pluck('id')->toArray(),

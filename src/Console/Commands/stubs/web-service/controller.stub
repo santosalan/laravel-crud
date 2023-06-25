@@ -1,0 +1,272 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+{{{uses}}}
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+
+class {{{plural_uc}}}Controller extends Controller
+{
+    /**
+     * Get a validator for an incoming registration request.
+     *
+     * @param  array  $data
+     * @param  string $method (default: C)
+     * @param  int $id (default: null)
+     * @return \Illuminate\Contracts\Validation\Validator
+     */
+    protected function validator(array $data, string $method = 'C', int $id = null)
+    {
+
+        $rules = [
+            'C' => [
+                {{{validators}}}
+            ],
+            'U' => [
+                {{{validators}}}
+            ],
+        ];
+
+        return Validator::make($data, $rules[$method]);
+    }
+
+    /**
+     * PLUCKS - plucks {{{singular}}}
+     *
+     * @return json plucks
+     */
+    public function plucks ()
+    {
+        $response = response()->json([
+            'action' => 'plucks',
+            'status' => 200,
+            'msg' => 'success',
+            'plucks' => [
+                {{{plucks}}}
+            ],
+        ], 200);
+
+        return $response;
+    }
+
+    /**
+     * INDEX - list {{{plural}}}
+     *
+     * @return json {{{plural}}}.list
+     */
+    public function list(Request $request)
+    {
+        try {
+            $r = $request->all();
+
+            ${{{plural}}} = {{{singular_uc}}}::filter($r);
+
+            $response = response()->json([
+                'action' => 'list',
+                'status' => 200,
+                'conditions' => $r,
+                'msg' => 'success',
+                '{{{plural}}}' => ${{{plural}}},
+            ], 200);
+
+        } catch(\Exception $e) {
+            $response = response()->json([
+                'action' => 'list',
+                'status' => 422,
+                'conditions' => $r,
+                'msg' => 'fail',
+                'errors' => $e->getMessage(),
+            ], 422);
+        }
+
+        return $response;
+    }
+
+    /**
+     * CREATE - {{{singular}}}
+     *
+     * @param  Request $request
+     * @return json {{{singular}}}.created
+     */
+    public function create(Request $request)
+    {
+        try {
+            $valid = $this->validator($request->all());
+
+            if (!$valid->fails()){
+                ${{{singular}}} = {{{singular_uc}}}::create($request->all());
+                ${{{singular}}}->syncRelationships($request->all());
+
+                $response = response()->json([
+                    'action' => 'create',
+                    'status' => 200,
+                    'msg' => 'success',
+                    '{{{singular}}}' => ${{{singular}}}->relationships(),
+                ], 200);
+
+            } else {
+                $response = response()->json([
+                    'action' => 'create',
+                    'status' => 422,
+                    'msg' => 'fail',
+                    'errors' => $valid->errors(),
+                ], 422);
+            }
+
+        } catch(\Exception $e) {
+            $response = response()->json([
+                'action' => 'create',
+                'status' => 422,
+                'msg' => 'fail',
+                'errors' => $e->getMessage(),
+            ], 422);
+        }
+
+        return $response;
+    }
+
+    /**
+     * READ - read {{{singular}}}
+     *
+     * @param  integer $id  {{{singular}}}->id
+     * @return json         {{{singular}}}.readed
+     */
+    public function read($id, Request $request)
+    {
+        try{
+            ${{{singular}}} = {{{singular_uc}}}::find($id);
+
+            if (! blank(${{{singular}}})) {
+                $response = response()->json([
+                    'action' => 'read',
+                    'status' => 200,
+                    'msg' => 'success',
+                    '{{{singular}}}' => ${{{singular}}}->relationships(),
+                ], 200);
+            } else {
+                $response = response()->json([
+                    'action' => 'read',
+                    'status' => 404,
+                    'msg' => 'fail',
+                    'errors' => [
+                        '{{{singular}}}' => ['Not found'],
+                    ],
+                ], 404);
+            }
+        } catch(\Exception $e) {
+            $response = response()->json([
+                'action' => 'read',
+                'status' => 422,
+                'msg' => 'fail',
+                'errors' => $e->getMessage(),
+            ], 422);
+        }
+
+        return $response;
+    }
+
+    /**
+     * UPDATE - update {{{singular}}}
+     *
+     * @param  integer $id      {{{singular}}}->id
+     * @param  Request $request
+     * @return json             {{{singular}}}.updated
+     */
+    public function update($id, Request $request)
+    {
+        try {
+            ${{{singular}}} = {{{singular_uc}}}::find($id);
+
+            if (! blank(${{{singular}}})) {
+                $valid = $this->validator($request->all(), 'U', $id);
+
+                if (!$valid->fails()){
+                    ${{{singular}}}->update($request->all());
+                    ${{{singular}}}->syncRelationships($request->all());
+
+                    $response = response()->json([
+                        'action' => 'update',
+                        'status' => 200,
+                        'msg' => 'success',
+                        '{{{singular}}}' => ${{{singular}}}->relationships(),
+                    ], 200);
+
+                } else {
+                    $response = response()->json([
+                        'action' => 'update',
+                        'status' => 422,
+                        'msg' => 'fail',
+                        'errors' => $valid->errors(),
+                    ], 422);
+                }
+
+            } else {
+                $response = response()->json([
+                    'action' => 'update',
+                    'status' => 404,
+                    'msg' => 'fail',
+                    'errors' => [
+                        '{{{singular}}}' => ['Not found'],
+                    ],
+                ], 404);
+            }
+
+        } catch(\Exception $e) {
+            $response = response()->json([
+                'action' => 'update',
+                'status' => 422,
+                'msg' => 'fail',
+                'errors' => $e->getMessage(),
+            ], 422);
+        }
+
+        return $response;
+    }
+
+    /**
+     * DELETE - delete {{{singular}}}
+     *
+     * @param  integer $id      {{{singular}}}->id
+     * @return json         {{{singular}}}.deleted
+     */
+    public function delete($id, Request $request)
+    {
+        try {
+            ${{{singular}}} = {{{singular_uc}}}::find($id);
+
+            if (! blank(${{{singular}}})) {
+                $clone = clone ${{{singular}}};
+
+                ${{{singular}}}->delete();
+
+                $response = response()->json([
+                    'action' => 'delete',
+                    'status' => 200,
+                    'msg' => 'success',
+                    '{{{singular}}}' => $clone,
+                ], 200);
+
+            } else {
+                $response = response()->json([
+                    'action' => 'delete',
+                    'status' => 404,
+                    'msg' => 'fail',
+                    'errors' => [
+                        '{{{singular}}}' => ['Not found'],
+                    ],
+                ], 404);
+            }
+        } catch(\Exception $e) {
+            $response = response()->json([
+                'action' => 'delete',
+                'status' => 422,
+                'msg' => 'fail',
+                'errors' => $e->getMessage(),
+            ], 422);
+        }
+
+        return $response;
+    }
+}

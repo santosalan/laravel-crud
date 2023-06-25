@@ -23,9 +23,11 @@ class CrudMakeCommand extends Command
      */
     protected $signature = 'make:crud
                             {--t|table= : [all | table number] }
-                            {--p|path-models=App : Namespace to Models (Directories will be created) }
+                            {--p|path-models=App\\Models : Namespace to Models (Directories will be created) }
                             {--r|routes=Y : [Y | N] }
                             {--a|api-client=N : [Y | N] (Api client to System Core generated with santosalan/lumen-crud)}
+                            {--w|web-service=N : [Y | N] (REST Web Service)}
+                            {--b|base-model=N : [Y | N] }
                             {--T|theme=1 : [1 = AdminLTE | 2 = Porto Admin] (Put the theme files in an exclusive folder inside public / vendor... If the theme is not free, an authorized copy of the theme is required... We will not deliver copies of themes that are not free. Any unauthorized copy is your complete responsibility.)}';
 
     /**
@@ -33,14 +35,14 @@ class CrudMakeCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Create a CRUD or API Client to Lumen-CRUD';
+    protected $description = 'Create a CRUD, Web Service or API Client to SantosAlan/Lumen-CRUD';
 
     /**
      * The path of Models
      *
      * @var string
      */
-    private $pathModels = 'App\\';
+    private $pathModels = 'App\\Models\\';
 
     /**
      * [$routes description]
@@ -53,6 +55,12 @@ class CrudMakeCommand extends Command
      * @var boolean
      */
     private $apiLumen = false;
+
+    /**
+     * [$webService description]
+     * @var boolean
+     */
+    private $webService = false;
 
     /**
      * [$theme 1=AdminLTE | 2=Porto Admin]
@@ -145,9 +153,12 @@ class CrudMakeCommand extends Command
 
             }
 
-            $fileWeb = fopen(base_path() . '/routes/web.php', 'a+');
-            fwrite($fileWeb, $routes);
-            fclose($fileWeb);
+            $fileRoutes = $this->webService 
+                            ? fopen(base_path() . '/routes/api.php', 'a+') 
+                            : fopen(base_path() . '/routes/web.php', 'a+');
+
+            fwrite($fileRoutes, $routes);
+            fclose($fileRoutes);
         }
     }
 
@@ -317,6 +328,21 @@ class CrudMakeCommand extends Command
         // Verify option API CLIENT
         if (!in_array(strtoupper(trim($this->option('api-client'))), ['N','NO','FALSE'])) {
             $this->apiLumen = true;
+        }
+
+    }
+
+    /**
+     * [processOptionWebService description]
+     * @return [type] [description]
+     */
+    public function processOptionWebService()
+    {
+        $this->alert('WEB SERVICE PROCESS');
+
+        // Verify option WEB SERVICE
+        if (!in_array(strtoupper(trim($this->option('web-service'))), ['N','NO','FALSE'])) {
+            $this->webService = true;
         }
 
     }
@@ -625,6 +651,8 @@ class CrudMakeCommand extends Command
     {
         if ($this->apiLumen) {
             $template = file_get_contents(__DIR__ . '/stubs/api/' . $type . '.stub');
+        } elseif ($this->webService) {
+            $template = file_get_contents(__DIR__ . '/stubs/web-service/' . $type . '.stub');
         } else {
             switch($type) {
                 case 'index.blade':
@@ -713,7 +741,7 @@ class CrudMakeCommand extends Command
                 if (empty($validators)) {
                     $validators = "'".$f->name."' => '" . $f->validator . "',\n";
                 } else {
-                    $validators .= "            '".$f->name."' => '" . $f->validator . "',\n";
+                    $validators .= "                '".$f->name."' => '" . $f->validator . "',\n";
                 }
             }
 
@@ -912,13 +940,29 @@ class CrudMakeCommand extends Command
                 return 'id';
             };
 
-            $attr = $type === 'belongs'
-                    ? $objTable->belongsTo
-                    : ($type === 'many'
-                        ? $objTable->hasMany
-                        : ($type === 'one'
-                            ? $objTable->hasOne
-                            : $objTable->belongsToMany));
+            $attr = [];
+            switch ($type) {
+                case 'belongs':
+                    $attr = $objTable->belongsTo;
+                    break;
+
+                case 'many':
+                    $attr = $objTable->hasMany;
+                    break;
+
+                case 'one':
+                    $attr = $objTable->hasOne;
+                    break;
+
+                case 'belongsMany':
+                case 'syncRelationships':
+                    $attr = $objTable->belongsToMany;
+                    break;
+
+                case 'relationships':
+                    $attr = array_merge($objTable->hasMany, $objTable->belongsToMany);
+            }
+
 
             foreach ($attr as $key => $item) {
                 foreach ($this->tables as $t) {
@@ -928,6 +972,7 @@ class CrudMakeCommand extends Command
 
                     $m = [
                         'plural' => $t->plural,
+                        'plural_uc' => ucwords($t->plural),
                         'kebab_plural' => Str::kebab($t->plural),
                         'singular_uc' => ucwords($t->singular),
                         'singular' => $t->singular,
@@ -1363,6 +1408,8 @@ class CrudMakeCommand extends Command
             'has_one' => $prepareSubTemplates('one'),
             'has_many' => $prepareSubTemplates('many'),
             'belongs_many' => $prepareSubTemplates('belongsMany'),
+            'sync_relationships' => $prepareSubTemplates('syncRelationships'),
+            'relationships' => $prepareSubTemplates('relationships'),
 
             // Index
             'filters_fields' => $prepareFiltersFields(),
@@ -1425,6 +1472,8 @@ class CrudMakeCommand extends Command
                 'has_one',
                 'has_many',
                 'belongs_many',
+                'sync_relationships',
+                'relationships',
             ],
 
             'pivot' => [
@@ -1476,6 +1525,15 @@ class CrudMakeCommand extends Command
                 'relation_table',
             ],
 
+            'syncRelationships' => [
+                'plural_uc',
+                'plural',
+            ],
+
+            'relationships' => [
+                'plural',
+            ],
+
             'index.blade' => [
                 'plural_uc',
                 'plural',
@@ -1525,6 +1583,20 @@ class CrudMakeCommand extends Command
     public function processFile(string $type)
     {
         $this->alert(strtoupper($type) . ' PROCESS');
+
+        if ($type == 'model' && strtoupper($this->option('base-model')) == 'Y') {
+            // Make the model object
+            $objMod = new \stdClass();
+            $objMod->singular = 'model';
+            $objMod->arqs = [
+                $type => str_replace('{{{namespace}}}',
+                                    trim(substr($this->pathModels,0,-1)),
+                                    $this->getTemplate('baseModel')),
+            ];
+
+            $this->createFile($type, $objMod);
+        }
+
         foreach ($this->tables as $key => $table) {
             if ($table->relationTable === true && $type !== 'pivot') {
                 continue;
@@ -1568,14 +1640,27 @@ class CrudMakeCommand extends Command
         $pathModels = explode('\\',$this->pathModels);
         unset($pathModels[0]);
 
-        // Paths type
-        $paths = [
-            'controller' => app_path() . '/Http/Controllers/',
-            'model' => app_path() . '/' . implode('/',$pathModels),
-            'index.blade' => resource_path() . '/views/' . Str::kebab($objTable->plural) . '/',
-            'form.blade' => resource_path() . '/views/' . Str::kebab($objTable->plural) . '/' ,
-            'show.blade' => resource_path() . '/views/' . Str::kebab($objTable->plural) . '/' ,
-        ];
+        try {
+
+            // Paths type
+            $paths = $this->webService 
+                            ? [
+                                'controller' => app_path() . '/Http/Controllers/Api/',
+                                'model' => app_path() . '/' . implode('/',$pathModels),
+                            ]
+                            : [
+                                'controller' => app_path() . '/Http/Controllers/',
+                                'model' => app_path() . '/' . implode('/',$pathModels),
+                                'index.blade' => resource_path() . '/views/' . Str::kebab($objTable->plural) . '/',
+                                'form.blade' => resource_path() . '/views/' . Str::kebab($objTable->plural) . '/' ,
+                                'show.blade' => resource_path() . '/views/' . Str::kebab($objTable->plural) . '/' ,
+                            ];
+
+        } catch (\Exception $e) {
+            dd($type, $objTable, $e->getMessage());
+            $this->error($e->getMessage());
+            exit;
+        }
 
         // Name Arq
         $prepareNameArq = function ($t) use ($objTable) {
@@ -1618,6 +1703,9 @@ class CrudMakeCommand extends Command
         // Process Api Client
         $this->processOptionApiClient();
 
+        // Process Web Server
+        $this->processOptionWebService();
+
         // Process Routes
         $this->processOptionRoutes();
 
@@ -1628,19 +1716,21 @@ class CrudMakeCommand extends Command
         $this->processOptionTable();
 
         // Process Controller
-        $this->processFile('controller');
+        $this->processFile('controller');   
 
         // Process Model
         $this->processFile('model');
 
-        // Process Show
-        $this->processFile('index.blade');
+        if (!$this->webService) {
+            // Process Index
+            $this->processFile('index.blade');
 
-        // Process Form
-        $this->processFile('form.blade');
+            // Process Form
+            $this->processFile('form.blade');
 
-        // Process Show
-        $this->processFile('show.blade');
+            // Process Show
+            $this->processFile('show.blade');
+        }
 
         // Process Routes
         $this->processRoutes();

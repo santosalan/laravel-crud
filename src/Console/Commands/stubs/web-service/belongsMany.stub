@@ -1,0 +1,10 @@
+    /**
+     * {{{singular_uc}}}
+     *
+     * @return {{{use_model}}}
+     */
+    public function {{{plural}}}()
+    {
+        return $this->belongsToMany('{{{use_model}}}', '{{{relation_table}}}', '{{{fk_model}}}', '{{{singular}}}_id');
+    }
+
