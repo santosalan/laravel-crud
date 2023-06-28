@@ -189,8 +189,15 @@ class CrudMakeCommand extends Command
         // Tables
         $tables = DB::select('SHOW TABLES');
 
+        $prefix = env('DB_PREFIX', '') !== '' 
+                    ? env('DB_PREFIX') 
+                    : ( env('DB_TABLE_PREFIX', '') !== '' 
+                        ? env('DB_TABLE_PREFIX') 
+                        : env('DB_PREFIX_TABLE', '') );
+        
         foreach ($tables as $t) {
-            if (in_array($t->{'Tables_in_' . env('DB_DATABASE')}, ['migrations', 'password_resets'])) {
+            $tbName = substr($t->{'Tables_in_' . env('DB_DATABASE')}, strlen($prefix));
+            if (in_array($tbName, ['migrations', 'password_resets', 'failed_jobs', 'password_reset_tokens', 'personal_access_tokens'])) {
                 continue;
             }
 
@@ -203,7 +210,8 @@ class CrudMakeCommand extends Command
 
             // Make the table object
             $objTab = new \stdClass();
-            $objTab->name = $t->{'Tables_in_' . env('DB_DATABASE')};
+            $objTab->originalName = $t->{'Tables_in_' . env('DB_DATABASE')};
+            $objTab->name = $tbName;
             $objTab->relationTable = false;
             $objTab->singular = Str::camel($prepareName($objTab->name, 'singular'));
             $objTab->plural = Str::camel($prepareName($objTab->name, 'plural'));
@@ -394,7 +402,7 @@ class CrudMakeCommand extends Command
         // process table
         $this->warn('TABLE ' . $table->name . ':');
 
-        $fields = DB::select('DESC ' . $table->name);
+        $fields = DB::select('DESC ' . $table->originalName);
 
         //dump($fields);
         foreach ($fields as $f) {
@@ -982,6 +990,9 @@ class CrudMakeCommand extends Command
                         'relation_table' => $key,
                     ];
 
+                    // dump($objTable->name);
+                    // dump($m);
+
                     $temp = $this->getTemplate($type);
 
                     foreach ($this->marks()[$type] as $mark){
@@ -1507,6 +1518,7 @@ class CrudMakeCommand extends Command
                 'singular',
                 'use_model',
                 'primary_model',
+                'fk_model',
             ],
 
             'one' => [
