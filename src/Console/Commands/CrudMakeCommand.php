@@ -115,6 +115,10 @@ class CrudMakeCommand extends Command
             if (trim($this->option('table')) === 'all') {
 
                 foreach ($this->tables as $table) {
+                    if ($table->relationTable) {
+                        continue;
+                    }
+
                     $m = [
                         'plural_uc' => ucwords($table->plural),
                         'plural' => $table->plural,
@@ -197,7 +201,18 @@ class CrudMakeCommand extends Command
         
         foreach ($tables as $t) {
             $tbName = substr($t->{'Tables_in_' . env('DB_DATABASE')}, strlen($prefix));
-            if (in_array($tbName, ['migrations', 'password_resets', 'failed_jobs', 'password_reset_tokens', 'personal_access_tokens'])) {
+            if (in_array($tbName, [
+                            'migrations', 
+                            'password_resets', 
+                            'failed_jobs', 
+                            'password_reset_tokens', 
+                            'personal_access_tokens',
+                            'jobs',
+                            'job_batches',
+                            'cache',
+                            'cache_locks',
+                            'sessions',
+                        ])) {
                 continue;
             }
 
@@ -209,23 +224,28 @@ class CrudMakeCommand extends Command
             };
 
             // Make the table object
-            $objTab = new \stdClass();
-            $objTab->originalName = $t->{'Tables_in_' . env('DB_DATABASE')};
-            $objTab->name = $tbName;
-            $objTab->relationTable = false;
-            $objTab->singular = Str::camel($prepareName($objTab->name, 'singular'));
-            $objTab->plural = Str::camel($prepareName($objTab->name, 'plural'));
-            $objTab->snakeSingular = Str::snake($objTab->singular);
-            $objTab->snakePlural = Str::snake($objTab->plural);
-            $objTab->fieldDisplay = false;
-            $objTab->fk = $objTab->snakeSingular . '_id';
-            $objTab->fields = [];
-            $objTab->belongsTo = [];
-            $objTab->hasMany = [];
-            $objTab->hasOne = [];
-            $objTab->belongsToMany = [];
-            $objTab->marks = [];
-            $objTab->arqs = [];
+            $tbNameSingular = Str::camel($prepareName($tbName, 'singular'));
+            $tbNamePlural = Str::camel($prepareName($tbName, 'plural'));
+
+            $objTab = (object) [
+                'originalName'     => $t->{'Tables_in_' . env('DB_DATABASE')},
+                'name'             => $tbName,
+                'relationTable'    => false,
+                'singular'         => $tbNameSingular,
+                'plural'           => $tbNamePlural,
+                'snakeSingular'    => Str::snake($tbNameSingular),
+                'snakePlural'      => Str::snake($tbNamePlural),
+                'fieldDisplay'     => false,
+                'fk'               => Str::snake($tbNameSingular) . '_id',
+                'fields'           => [],
+                'belongsTo'        => [],
+                'hasMany'          => [],
+                'hasOne'           => [],
+                'belongsToMany'    => [],
+                'marks'            => [],
+                'arqs'             => [],
+            ];
+
 
 
             array_push($this->tables, $objTab);
@@ -233,43 +253,31 @@ class CrudMakeCommand extends Command
 
         // dd($this->tables);
 
-        // Register belongsToMany
+
+        $verifyTableNames = collect($this->tables)->pluck('name');
+
         foreach ($this->tables as $table) {
-            $tabs = explode('_', $table->name);
+            $parts = explode('_', $table->name);
 
-            if (count($tabs) === 2) {
-                $tab1 = Pluralizer::plural($tabs[0]);
-                $tab2 = Pluralizer::plural($tabs[1]);
-                $rel1 = false;
-                $rel2 = false;
-
-                foreach ($this->tables as $t) {
-                    if ($t->name == $tab1) {
-                        $rel1 = true;
-                    }
-
-                    if ($t->name == $tab2) {
-                        $rel2 = true;
-                    }
-                }
-
-                if ($rel1 && $rel2) {
-                    foreach ($this->tables as $t) {
-                        if ($t->name == $tab1) {
-                            $t->belongsToMany[$table->name] = $tab2;
-                        }
-
-                        if ($t->name == $tab2) {
-                            $t->belongsToMany[$table->name] = $tab1;
-                        }
-                    }
-
-                    $table->relationTable = true;
-                }
-
-
+            if (count($parts) !== 2) {
+                continue;
             }
 
+            [$first, $second] = array_map([Pluralizer::class, 'plural'], $parts);
+
+            if (!$verifyTableNames->contains($first) || !$verifyTableNames->contains($second)) {
+                continue;
+            }
+
+            foreach ($this->tables as $t) {
+                if ($t->name === $first) {
+                    $t->belongsToMany[$table->name] = $second;
+                } elseif ($t->name === $second) {
+                    $t->belongsToMany[$table->name] = $first;
+                }
+            }
+
+            $table->relationTable = true;
         }
 
         // dd($this->tables);
