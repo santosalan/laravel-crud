@@ -67,10 +67,10 @@ class ServiceProvider extends BaseServiceProvider
 
     private function publishConfig()
     {
-        $configPath = $this->packagePath('app/config');
+        $configPath = $this->packagePath('config');
 
         $this->publishes([
-            $configPath => app_path('config'),
+            $configPath => config_path(),
         ], 'config');
 
     }
