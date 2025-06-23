@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Services;
+
+use App\Repositories\{{{singular_uc}}}Repository;
+
+class {{{singular_uc}}}Service
+{
+    protected ${{{singular}}}Repository;
+
+    public function __construct({{{singular_uc}}}Repository ${{{singular}}}Repository)
+    {
+        $this->{{{singular}}}Repository = ${{{singular}}}Repository;
+    }
+
+    public function plucks()
+    {
+        return $this->{{{singular}}}Repository->plucks();
+    }
+
+    public function list(array $filters)
+    {
+        return $this->{{{singular}}}Repository->filter($filters);
+    }
+
+    public function create(array $data)
+    {
+        return $this->{{{singular}}}Repository->create($data);
+    }
+
+    public function read($id)
+    {
+        return $this->{{{singular}}}Repository->find($id);
+    }
+
+    public function update($id, array $data)
+    {
+        return $this->{{{singular}}}Repository->update($id, $data);
+    }
+
+    public function delete($id)
+    {
+        return $this->{{{singular}}}Repository->delete($id);
+    }
+}

@@ -19,7 +19,7 @@
 
         {{ Form::model(${{{singular}}},
             ['method' => 'delete',
-             'action' => ['{{{plural_uc}}}Controller@destroy', ${{{singular}}}->id],
+             'action' => ['App\Http\Controllers\{{{plural_uc}}}Controller@destroy', ${{{singular}}}->id],
              'class' => 'form-inline form-delete',
              'style' => 'display: inline;']) }}
             {{ Form::hidden('id', ${{{singular}}}->id) }}

@@ -47,10 +47,10 @@
 
     @if (Request::is('*/create'))
         <div class="box box-success">
-            {{ Form::open(['action' => '{{{plural_uc}}}Controller@store', 'method' => 'POST']) }}
+            {{ Form::open(['action' => 'App\Http\Controllers\{{{plural_uc}}}Controller@store', 'method' => 'POST']) }}
     @else
         <div class="box box-warning">
-            {{ Form::model(${{{singular}}}, ['action' => ['{{{plural_uc}}}Controller@update', ${{{singular}}}->{{{primary_key}}}], 'method' => 'PATCH']) }}
+            {{ Form::model(${{{singular}}}, ['action' => ['App\Http\Controllers\{{{plural_uc}}}Controller@update', ${{{singular}}}->{{{primary_key}}}], 'method' => 'PATCH']) }}
     @endif
 
 

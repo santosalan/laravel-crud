@@ -1,0 +1,248 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Helpers\ResponseHelper;
+use App\Http\Requests\{{{singular_uc}}}Request;
+use App\Services\{{{singular_uc}}}Service;
+use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
+
+
+class {{{plural_uc}}}Controller extends Controller
+{
+
+    protected ${{{singular}}}Service;
+
+    /**
+     * Create a new controller instance.
+     *
+     * @param  {{{singular_uc}}}Service ${{{singular}}}Service
+     * @return void
+     */
+    public function __construct({{{singular_uc}}}Service ${{{singular}}}Service)
+    {
+
+        $this->{{{singular}}}Service = ${{{singular}}}Service;
+
+    }
+
+    /**
+     * PLUCKS - plucks {{{singular}}}
+     *
+     * @param  {{{singular_uc}}}Request $request
+     * @return JsonResponse plucks
+     */
+    public function plucks({{{singular_uc}}}Request $request): JsonResponse
+    {
+        $plucks = $this->{{{singular}}}Service->plucks();
+        
+        return ResponseHelper::success(
+                                    'plucks', 
+                                    [
+                                        'request' => $request->all(), 
+                                        'plucks' => $plucks
+                                    ]
+                                );
+    }
+
+    /**
+     * INDEX - list {{{plural}}}
+     *
+     * @param  {{{singular_uc}}}Request $request
+     * @return JsonResponse {{{plural}}}.list
+     */
+    public function list({{{singular_uc}}}Request $request): JsonResponse
+    {
+
+        try {
+
+            ${{{plural}}} = $this->{{{singular}}}Service->list($request->all());
+
+            $response = ResponseHelper::success(
+                                            'list', 
+                                            [
+                                                'request' => $request->all(), 
+                                                '{{{plural}}}' => ${{{plural}}}
+                                            ]
+                                        );
+
+        } catch(\Exception $e) {
+            $response = ResponseHelper::error(
+                                            'list', 
+                                            [
+                                                'request' => $request->all(), 
+                                                'errors' => $e->getMessage()
+                                            ]
+                                        );
+        }
+
+        return $response;
+    }
+
+    /**
+     * CREATE - {{{singular}}}
+     *
+     * @param  {{{singular_uc}}}Request $request
+     * @return JsonResponse {{{singular}}}.created
+     */
+    public function create({{{singular_uc}}}Request $request): JsonResponse
+    {
+        try {
+
+            ${{{singular}}} = $this->{{{singular}}}Service->create($request->all());
+
+            $response = ResponseHelper::success(
+                                            'create', 
+                                            [
+                                                '{{{singular}}}' => ${{{singular}}}->relationships(),
+                                            ]
+                                        );
+
+        } catch(\Exception $e) {
+            $response = ResponseHelper::error(
+                                            'create',
+                                            [
+                                                'request' => $request->all(),
+                                                'errors' => $e->getMessage()
+                                            ]
+                                        );
+        }
+
+        return $response;
+    }
+
+    /**
+     * READ - read {{{singular}}}
+     *
+     * @param  integer $id  {{{singular}}}->id
+     * @param  {{{singular_uc}}}Request $request
+     * @return JsonResponse {{{singular}}}.readed
+     */
+    public function read($id, {{{singular_uc}}}Request $request): JsonResponse
+    {
+        try{
+            ${{{singular}}} = $this->{{{singular}}}Service->read($id);
+
+            $response = ResponseHelper::success(
+                                            'read',
+                                            [
+                                                'request' => $request->all(),
+                                                '{{{singular}}}' => ${{{singular}}}->relationships(),
+                                            ]
+                                        );
+        
+        } catch(ModelNotFoundException $e) {
+            $response = ResponseHelper::notFound(
+                                            'read',
+                                            [
+                                                'request' => $request->all(),
+                                                'errors' => ['{{{singular}}}' => ['Not found']],
+                                            ],
+                                        );
+         
+        } catch(\Exception $e) {
+            
+            $response = ResponseHelper::error(
+                                            'read',
+                                            [
+                                                'request' => $request->all(),
+                                                'errors' => $e->getMessage(),
+                                            ]
+                                        );
+        }
+
+        return $response;
+    }
+
+    /**
+     * UPDATE - update {{{singular}}}
+     *
+     * @param  integer $id      {{{singular}}}->id
+     * @param  {{{singular_uc}}}Request $request
+     * @return JsonResponse {{{singular}}}.updated
+     */
+    public function update($id, {{{singular_uc}}}Request $request): JsonResponse
+    {
+        try {
+
+            ${{{singular}}} = $this->{{{singular}}}Service->update($id, $request->all());
+
+            $response = ResponseHelper::success(
+                                            'update',
+                                            [
+                                                'request' => $request->all(),
+                                                '{{{singular}}}' => ${{{singular}}}->relationships(),
+                                            ]
+                                        );
+
+
+        } catch(ModelNotFoundException $e) {
+            $response = ResponseHelper::notFound(
+                                            'update',
+                                            [
+                                                'request' => $request->all(),
+                                                'errors' => ['{{{singular}}}' => ['Not found']],
+                                            ]
+                                        );
+
+        } catch(\Exception $e) {
+            $response = ResponseHelper::error(
+                                            'update',
+                                            [
+                                                'request' => $request->all(),
+                                                'errors' => $e->getMessage(),
+                                            ]
+                                        );
+                                        
+        }
+
+        return $response;
+    }
+
+    /**
+     * DELETE - delete {{{singular}}}
+     *
+     * @param  integer $id      {{{singular}}}->id
+     * @param  {{{singular_uc}}}Request $request
+     * @return JsonResponse {{{singular}}}.deleted
+     */
+    public function delete($id, {{{singular_uc}}}Request $request): JsonResponse
+    {
+        try {
+            
+            ${{{singular}}} = $this->{{{singular}}}Service->delete($id);
+
+            $response = ResponseHelper::success(
+                                            'delete',
+                                            [
+                                                'request' => $request->all(),
+                                                '{{{singular}}}' => ${{{singular}}},
+                                            ]
+                                        );
+
+
+        } catch(ModelNotFoundException $e) {
+            $response = ResponseHelper::notFound(
+                                            'delete',
+                                            [
+                                                'request' => $request->all(),
+                                                'errors' => ['{{{singular}}}' => ['Not found']],
+                                            ]
+                                        );
+
+        } catch(\Exception $e) {
+            $response = ResponseHelper::error(
+                                            'delete',
+                                            [
+                                                'request' => $request->all(),
+                                                'errors' => $e->getMessage(),
+                                            ]
+                                        );
+
+        }
+
+        return $response;
+    }
+}

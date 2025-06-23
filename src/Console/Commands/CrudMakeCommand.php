@@ -28,7 +28,9 @@ class CrudMakeCommand extends Command
                             {--a|api-client=N : [Y | N] (Api client to System Core generated with santosalan/lumen-crud)}
                             {--w|web-service=N : [Y | N] (REST Web Service)}
                             {--b|base-model=N : [Y | N] }
+                            {--P|professional=N : [Y | N] (Professional mode, generates with Requests, Services and Repositories)}
                             {--T|theme=1 : [1 = AdminLTE | 2 = Porto Admin] (Put the theme files in an exclusive folder inside public / vendor... If the theme is not free, an authorized copy of the theme is required... We will not deliver copies of themes that are not free. Any unauthorized copy is your complete responsibility.)}';
+
 
     /**
      * The console command description.
@@ -61,6 +63,12 @@ class CrudMakeCommand extends Command
      * @var boolean
      */
     private $webService = false;
+
+    /**
+     * [$professional description]
+     * @var boolean
+     */
+    private $professional = false;
 
     /**
      * [$theme 1=AdminLTE | 2=Porto Admin]
@@ -364,6 +372,21 @@ class CrudMakeCommand extends Command
     }
 
     /**
+     * [processOptionProfessional description]
+     * @return [type] [description]
+     */
+    public function processOptionProfessional()
+    {
+        $this->alert('PROFESSIONAL PROCESS');
+
+        // Verify option PROFESSIONAL
+        if (!in_array(strtoupper(trim($this->option('professional'))), ['N','NO','FALSE'])) {
+            $this->professional = true;
+        }
+
+    }
+
+    /**
      * [processOptionTheme description]
      * @return [type] [description]
      */
@@ -462,6 +485,7 @@ class CrudMakeCommand extends Command
         $objField->default = $field->Default;
         $objField->autoIncrement = strpos($field->Extra, 'auto_increment') !== false ? true : false;
         $objField->validator = $this->generateValidator($objField, $table);
+        $objField->validatorUpdate = $this->generateValidator($objField, $table, true);
         $objField->filter_set = $this->generateFilterSet($objField);
         $objField->filter = $this->generateFilter($objField);
 
@@ -491,7 +515,7 @@ class CrudMakeCommand extends Command
      * [generateValidator description]
      * @return [type] [description]
      */
-    public function generateValidator($objField, $table)
+    public function generateValidator($objField, $table, $update = false)
     {
 
         // Get Field Type
@@ -529,8 +553,12 @@ class CrudMakeCommand extends Command
                         ? '|max:' . $objField->size
                         : '';
         $validator .= strpos($objField->name, 'email') !== false ? '|email' : '';
-        $validator .= $objField->unique ? '|unique:' . $table->name . ',' . $pk : '';
-        $validator .= $objField->required ? '|required' : '';
+        $validator .= $objField->unique && !$update ? '|unique:' . $table->name . ',' . $objField->name : '';
+        $validator .= $objField->unique && $update ? '|unique:' . $table->name . ',' . $objField->name . ',\' . $' . $table->singular . 'Id . \'' : '';
+        
+        $validator .= $objField->required && !$update ? '|required' : '';
+        $validator .= $objField->required && $update ? '|sometimes' : '';
+        
 
         return $validator;
 
@@ -668,7 +696,9 @@ class CrudMakeCommand extends Command
         if ($this->apiLumen) {
             $template = file_get_contents(__DIR__ . '/stubs/api/' . $type . '.stub');
         } elseif ($this->webService) {
-            $template = file_get_contents(__DIR__ . '/stubs/web-service/' . $type . '.stub');
+            $template = $this->professional && in_array($type, ['controller', 'repository', 'service', 'request'])
+                            ? file_get_contents(__DIR__ . '/stubs/web-service/pro/' . $type . '.stub')
+                            : file_get_contents(__DIR__ . '/stubs/web-service/' . $type . '.stub');
         } else {
             switch($type) {
                 case 'index.blade':
@@ -758,6 +788,23 @@ class CrudMakeCommand extends Command
                     $validators = "'".$f->name."' => '" . $f->validator . "',\n";
                 } else {
                     $validators .= "                '".$f->name."' => '" . $f->validator . "',\n";
+                }
+            }
+
+            return $validators;
+        };
+
+        $prepareValidatorsUpdate = function () use ($objTable) {
+            $validators = '';
+            foreach ($objTable->fields as $f) {
+                if (in_array($f->name, ['id', 'created_at', 'updated_at', 'deleted_at', 'remember_token'])){
+                    continue;
+                }
+
+                if (empty($validators)) {
+                    $validators = "'".$f->name."' => '" . $f->validatorUpdate . "',\n";
+                } else {
+                    $validators .= "                '".$f->name."' => '" . $f->validatorUpdate . "',\n";
                 }
             }
 
@@ -1406,6 +1453,7 @@ class CrudMakeCommand extends Command
             // Controller
             'uses' => $prepareUses(),
             'validators' => $prepareValidators(),
+            'validators_update' => $prepareValidatorsUpdate(),
             'plucks' => $preparePlucks(),
             // 'filter_plucks' => $prepareFilterPlucks(),
             'filters_set' => $prepareFiltersSet(),
@@ -1463,6 +1511,51 @@ class CrudMakeCommand extends Command
                 'singular',
                 'uses',
                 'validators',
+                'validators_update',
+                'plucks',
+                // 'filter_plucks',
+                'filters_set',
+                'filters',
+                'compacts',
+                'compacts_c',
+            ],
+
+            'request' => [
+                'plural_uc',
+                'plural',
+                'kebab_plural',
+                'singular_uc',
+                'singular',
+                'validators',
+                'validators_update',
+            ],
+
+            'service' => [
+                'plural_uc',
+                'plural',
+                'kebab_plural',
+                'singular_uc',
+                'singular',
+                'uses',
+                'validators',
+                'validators_update',
+                'plucks',
+                // 'filter_plucks',
+                'filters_set',
+                'filters',
+                'compacts',
+                'compacts_c',
+            ],
+
+            'repository' => [
+                'plural_uc',
+                'plural',
+                'kebab_plural',
+                'singular_uc',
+                'singular',
+                'uses',
+                'validators',
+                'validators_update',
                 'plucks',
                 // 'filter_plucks',
                 'filters_set',
@@ -1667,6 +1760,9 @@ class CrudMakeCommand extends Command
                             ? [
                                 'controller' => app_path() . '/Http/Controllers/Api/',
                                 'model' => app_path() . '/' . implode('/',$pathModels),
+                                'request' => app_path() . '/Http/Requests/',
+                                'service' => app_path() . '/Services/',
+                                'repository' => app_path() . '/Repositories/',
                             ]
                             : [
                                 'controller' => app_path() . '/Http/Controllers/',
@@ -1689,6 +1785,18 @@ class CrudMakeCommand extends Command
             switch ($t) {
                 case 'controller':
                     $nameArq = ucwords($objTable->plural) . 'Controller.php';
+                    break;
+
+                case 'request':
+                    $nameArq = ucwords($objTable->singular) . 'Request.php';
+                    break;
+
+                case 'service':
+                    $nameArq = ucwords($objTable->singular) . 'Service.php';
+                    break;
+
+                case 'repository':
+                    $nameArq = ucwords($objTable->singular) . 'Repository.php';
                     break;
 
                 case 'model':
@@ -1726,6 +1834,9 @@ class CrudMakeCommand extends Command
         // Process Web Server
         $this->processOptionWebService();
 
+        // Process Professional
+        $this->processOptionProfessional();
+
         // Process Routes
         $this->processOptionRoutes();
 
@@ -1740,6 +1851,17 @@ class CrudMakeCommand extends Command
 
         // Process Model
         $this->processFile('model');
+
+        if ($this->webService && $this->professional) {
+            // Process Request
+            $this->processFile('request');
+
+            // Process Service
+            $this->processFile('service');
+
+            // Process Repository
+            $this->processFile('repository');
+        }
 
         if (!$this->webService) {
             // Process Index

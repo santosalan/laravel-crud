@@ -18,6 +18,8 @@ class ServiceProvider extends BaseServiceProvider
 
         $this->publishServices();
 
+        $this->publishHelpers();
+
         $this->publishViews();
 
         $this->registerCommands();
@@ -50,6 +52,15 @@ class ServiceProvider extends BaseServiceProvider
         $this->publishes([
             $servicesPath => app_path('Services'),
         ], 'services');
+    }
+
+    private function publishHelpers()
+    {
+        $helpersPath = $this->packagePath('app/Helpers');
+
+        $this->publishes([
+            $helpersPath => app_path('Helpers'),
+        ], 'helpers');
     }
 
     private function packagePath($path)

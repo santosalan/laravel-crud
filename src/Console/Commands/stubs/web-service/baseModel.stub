@@ -30,7 +30,13 @@ class Model extends EloquentModel
                     ? $conditions['withCount']
                     : [];
         $pagination = isset($conditions['pagination'])
-                        ? $conditions['pagination']
+                        ? array_merge(
+                            [
+                                'page' => 1,
+                                'limit' => 20,
+                            ],
+                            $conditions['pagination']
+                        )
                         : [
                             'page' => 1,
                             'limit' => 100,
@@ -51,7 +57,7 @@ class Model extends EloquentModel
                 } elseif (count($condition) == 2) {
                     if (strtolower(trim($condition[0])) === 'between') {
                         $obj = $obj->whereBetween($key, $condition[1]);
-                    } if (strtolower(trim($condition[0])) === 'in') {
+                    } elseif (strtolower(trim($condition[0])) === 'in') {
                         $obj = $obj->whereIn($key, $condition[1]);
                     } else {
                         $obj = $obj->where($key, $condition[0], $condition[1]);
@@ -59,7 +65,7 @@ class Model extends EloquentModel
                 } elseif (count($condition) == 3) {
                     if (strtolower(trim($condition[0])) === 'between') {
                         $obj = $obj->whereBetween($key, $condition[1], $condition[2]);
-                    } if (strtolower(trim($condition[0])) === 'in') {
+                    } elseif (strtolower(trim($condition[0])) === 'in') {
                         $obj = $obj->whereIn($key, $condition[1], $condition[2]);
                     } else {
                         $obj = $obj->where($key, $condition[0], $condition[1], $condition[2]);

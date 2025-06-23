@@ -1,0 +1,92 @@
+<?php
+
+namespace App\Repositories;
+
+use App\Models\{{{singular_uc}}};
+use Illuminate\Pagination\LengthAwarePaginator;
+
+interface {{{singular_uc}}}RepositoryInterface
+{
+    public function plucks();
+    public function filter(array $filters);
+    public function create(array $data);
+    public function find($id);
+    public function update($id, array $data);
+    public function delete($id);
+}
+
+class {{{singular_uc}}}Repository implements {{{singular_uc}}}RepositoryInterface
+{
+    /**
+     * Get plucks for {{{plural}}}.
+     *
+     * @return array
+     */
+    public function plucks()
+    {
+        return [];
+    }
+
+    /**
+     * Filter {{{plural}}} based on the provided filters.
+     *
+     * @param array $filters
+     * @return LengthAwarePaginator
+     */
+    public function filter(array $filters): LengthAwarePaginator
+    {
+        return {{{singular_uc}}}::filter($filters);
+    }
+
+    /**
+     * Create a new {{{singular}}} with the provided data.
+     *
+     * @param array $data
+     * @return {{{singular_uc}}}
+     */
+    public function create(array $data)
+    {
+        ${{{singular}}} = {{{singular_uc}}}::create($data);
+        ${{{singular}}}->syncRelationships($data);
+        return ${{{singular}}};
+    }
+
+    /**
+     * Find a {{{singular}}} by ID.
+     *
+     * @param mixed $id
+     * @return {{{singular_uc}}}
+     */
+    public function find($id)
+    {
+        return {{{singular_uc}}}::findOrFail($id);
+    }
+
+    /**
+     * Update a {{{singular}}} by ID with the provided data.
+     *
+     * @param mixed $id
+     * @param array $data
+     * @return {{{singular_uc}}}
+     */
+    public function update($id, array $data)
+    {
+        ${{{singular}}} = $this->find($id);
+        ${{{singular}}}->update($data);
+        ${{{singular}}}->syncRelationships($data);
+        return ${{{singular}}};
+    }
+
+    /**
+     * Delete a {{{singular}}} by ID.
+     *
+     * @param mixed $id
+     * @return {{{singular_uc}}}
+     */
+    public function delete($id)
+    {
+        ${{{singular}}} = $this->find($id);
+        ${{{singular}}}->delete();
+        return ${{{singular}}};
+    }
+}

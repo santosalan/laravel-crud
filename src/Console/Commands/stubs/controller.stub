@@ -38,7 +38,8 @@ class {{{plural_uc}}}Controller extends Controller
                                     ]);
         }
 
-        if (blank($request->session()->get('{{{kebab_plural}}}')['filter'])) {
+        if (blank($request->session()->get('{{{kebab_plural}}}'))
+            || blank($request->session()->get('{{{kebab_plural}}}')['filter'])) {
             $request->session()->put('{{{kebab_plural}}}', [
                                         'filter' => []
                                     ]);

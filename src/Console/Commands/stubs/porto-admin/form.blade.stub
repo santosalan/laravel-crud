@@ -52,10 +52,10 @@
     <div class="col-12">
         @if (Request::is('*/create'))
             <div class="card card-featured card-featured-success">
-                {{ Form::open(['action' => '{{{plural_uc}}}Controller@store', 'method' => 'POST']) }}
+                {{ Form::open(['action' => 'App\Http\Controllers\{{{plural_uc}}}Controller@store', 'method' => 'POST']) }}
         @else
             <div class="card card-featured card-featured-warning">
-                {{ Form::model(${{{singular}}}, ['action' => ['{{{plural_uc}}}Controller@update', ${{{singular}}}->{{{primary_key}}}], 'method' => 'PATCH']) }}
+                {{ Form::model(${{{singular}}}, ['action' => ['App\Http\Controllers\{{{plural_uc}}}Controller@update', ${{{singular}}}->{{{primary_key}}}], 'method' => 'PATCH']) }}
         @endif
 
 

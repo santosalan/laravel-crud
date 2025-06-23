@@ -58,7 +58,7 @@
 
     <div class="col-12">
         <div class="card card-featured card-featured-info">
-            {{ Form::open(['action' => '{{{plural_uc}}}Controller@index', 'method' => 'POST', 'id' => 'filter-form']) }}
+            {{ Form::open(['action' => 'App\Http\Controllers\{{{plural_uc}}}Controller@index', 'method' => 'POST', 'id' => 'filter-form']) }}
                 <div class="card-header">
                     <h4><i class="fa fa-search"></i> {{ trans('laravel-crud::view.filters') }}</h4>
                 </div>
@@ -114,7 +114,7 @@
 
                                         {{ Form::model(${{{singular}}},
                                             ['method' => 'delete',
-                                             'action' => ['{{{plural_uc}}}Controller@destroy', ${{{singular}}}->id],
+                                             'action' => ['App\Http\Controllers\{{{plural_uc}}}Controller@destroy', ${{{singular}}}->id],
                                              'class' => 'form-inline form-delete',
                                              'style' => 'display: inline;']) }}
                                             {{ Form::hidden('id', ${{{singular}}}->id) }}
