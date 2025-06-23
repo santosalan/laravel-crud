@@ -30,16 +30,14 @@ class Model extends EloquentModel
                     ? $conditions['withCount']
                     : [];
         $pagination = isset($conditions['pagination'])
-                        ? array_merge(
-                            [
-                                'page' => 1,
-                                'limit' => 20,
-                            ],
-                            $conditions['pagination']
-                        )
+                        ? [
+                            'page' => 1,
+                            'limit' => 20,
+                            ...$conditions['pagination']
+                        ],
                         : [
                             'page' => 1,
-                            'limit' => 100,
+                            'limit' => 20,
                         ];
 
         unset(
