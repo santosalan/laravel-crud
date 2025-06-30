@@ -4,27 +4,40 @@ namespace App\Repositories;
 
 use App\Models\{{{singular_uc}}};
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Repositories\Interfaces\RepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
 
-interface {{{singular_uc}}}RepositoryInterface
+interface {{{singular_uc}}}RepositoryInterface extends RepositoryInterface
 {
-    public function plucks();
-    public function filter(array $filters);
-    public function create(array $data);
-    public function find($id);
-    public function update($id, array $data);
-    public function delete($id);
+    public function plucks(): array;
+    public function all(): Collection;
+    public function filter(array $filters): LengthAwarePaginator;
+    public function create(array $data): {{{singular_uc}}};
+    public function find($id): ?{{{singular_uc}}};
+    public function update($id, array $data): {{{singular_uc}}};
+    public function delete($id): {{{singular_uc}}};
 }
 
-class {{{singular_uc}}}Repository implements {{{singular_uc}}}RepositoryInterface
+class {{{singular_uc}}}Repository implements RepositoryInterface
 {
     /**
      * Get plucks for {{{plural}}}.
      *
      * @return array
      */
-    public function plucks()
+    public function plucks(): array
     {
         return [];
+    }
+
+    /**
+     * Get all {{{plural}}}.
+     *
+     * @return Collection
+     */
+    public function all(): Collection
+    {
+        return {{{singular_uc}}}::all();
     }
 
     /**
@@ -44,7 +57,7 @@ class {{{singular_uc}}}Repository implements {{{singular_uc}}}RepositoryInterfac
      * @param array $data
      * @return {{{singular_uc}}}
      */
-    public function create(array $data)
+    public function create(array $data): {{{singular_uc}}}
     {
         ${{{singular}}} = {{{singular_uc}}}::create($data);
         ${{{singular}}}->syncRelationships($data);
@@ -55,9 +68,9 @@ class {{{singular_uc}}}Repository implements {{{singular_uc}}}RepositoryInterfac
      * Find a {{{singular}}} by ID.
      *
      * @param mixed $id
-     * @return {{{singular_uc}}}
+     * @return ?{{{singular_uc}}}
      */
-    public function find($id)
+    public function find($id): ?{{{singular_uc}}}
     {
         return {{{singular_uc}}}::findOrFail($id);
     }
@@ -69,7 +82,7 @@ class {{{singular_uc}}}Repository implements {{{singular_uc}}}RepositoryInterfac
      * @param array $data
      * @return {{{singular_uc}}}
      */
-    public function update($id, array $data)
+    public function update($id, array $data): {{{singular_uc}}}
     {
         ${{{singular}}} = $this->find($id);
         ${{{singular}}}->update($data);
@@ -83,7 +96,7 @@ class {{{singular_uc}}}Repository implements {{{singular_uc}}}RepositoryInterfac
      * @param mixed $id
      * @return {{{singular_uc}}}
      */
-    public function delete($id)
+    public function delete($id): {{{singular_uc}}}
     {
         ${{{singular}}} = $this->find($id);
         ${{{singular}}}->delete();

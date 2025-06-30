@@ -16,6 +16,8 @@ class ServiceProvider extends BaseServiceProvider
     {
         $this->loadTranslations();
 
+        $this->publishRepositories();
+        
         $this->publishServices();
 
         $this->publishHelpers();
@@ -45,6 +47,15 @@ class ServiceProvider extends BaseServiceProvider
         $this->publishes([
             $layoutsPath => resource_path('views'),
         ], 'views');
+    }
+
+    private function publishRepositories()
+    {
+        $repositoriesPath = $this->packagePath('app/Repositories');
+
+        $this->publishes([
+            $repositoriesPath => app_path('Repositories'),
+        ], 'repositories');
     }
 
     private function publishServices()
