@@ -1,16 +1,9 @@
 <?php
 
-namespace {{{namespace}}};
+namespace App\Models\Traits;
 
-use App\Models\Traits\HasFilter;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Model as EloquentModel;
-
-class Model extends EloquentModel
+trait HasFilter
 {
-    use HasFilter;
-    use Notifiable;
-
     /**
      * FILTER
      *
@@ -24,6 +17,9 @@ class Model extends EloquentModel
             $obj = new $model();
         }
 
+        $fields = isset($conditions['fields'])
+                    ? $conditions['fields']
+                    : [];
         $with = isset($conditions['with'])
                     ? $conditions['with']
                     : [];
@@ -38,18 +34,20 @@ class Model extends EloquentModel
                             'page' => 1,
                             'limit' => 20,
                             ...$conditions['pagination']
-                        ],
+                        ]
                         : [
                             'page' => 1,
                             'limit' => 20,
                         ];
 
         unset(
+            $conditions['fields'],
             $conditions['with'],
             $conditions['without'],
             $conditions['withCount'],
             $conditions['pagination']
         );
+
 
         foreach ($conditions as $key => $condition) {
 
@@ -89,6 +87,13 @@ class Model extends EloquentModel
         }
 
         $obj = $obj->without($without)->with($with)->withCount($withCount);
+        
+        if (! blank($fields) && is_array($fields)) {
+            $obj = $obj->select($fields);
+        } elseif (! blank($fields) && is_string($fields)) {
+            $obj = $obj->select(array_map('trim', explode(',', $fields)));
+        }
+
         if (! blank($pagination) && is_array($pagination)) {
             $obj = $obj->paginate($pagination['limit'], ['*'], 'page', $pagination['page']);
         } else {
