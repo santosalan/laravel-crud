@@ -12,33 +12,21 @@ trait HasFilter
     public static function filter(array $conditions, $obj = null)
     {
 
-        if (blank($obj)) {
-            $model = static::class;
-            $obj = new $model();
-        }
+        $obj = $obj ?? self::newModelObj();
 
-        $fields = isset($conditions['fields'])
-                    ? $conditions['fields']
-                    : [];
-        $with = isset($conditions['with'])
-                    ? $conditions['with']
-                    : [];
-        $without = isset($conditions['without'])
-                    ? $conditions['without']
-                    : [];
-        $withCount = isset($conditions['withCount'])
-                    ? $conditions['withCount']
-                    : [];
-        $pagination = isset($conditions['pagination'])
-                        ? [
-                            'page' => 1,
-                            'limit' => 20,
-                            ...$conditions['pagination']
-                        ]
-                        : [
-                            'page' => 1,
-                            'limit' => 20,
-                        ];
+        $fields = $conditions['fields'] ?? [];
+
+        $with = $conditions['with'] ?? [];
+        
+        $without = $conditions['without'] ?? [];
+                    
+        $withCount = $conditions['withCount'] ?? [];
+
+        $pagination = [
+                        'page' => 1,
+                        'limit' => 20,
+                        ...($conditions['pagination'] ?? []),
+                    ];
 
         unset(
             $conditions['fields'],
@@ -52,27 +40,7 @@ trait HasFilter
         foreach ($conditions as $key => $condition) {
 
             if (is_array($condition)) {
-                if (count($condition) == 1) {
-                    $obj = $obj->where($key, $condition[0]);
-                } elseif (count($condition) == 2) {
-                    if (strtolower(trim($condition[0])) === 'between') {
-                        $obj = $obj->whereBetween($key, $condition[1]);
-                    } elseif (strtolower(trim($condition[0])) === 'in') {
-                        $obj = $obj->whereIn($key, $condition[1]);
-                    } else {
-                        $obj = $obj->where($key, $condition[0], $condition[1]);
-                    }
-                } elseif (count($condition) == 3) {
-                    if (strtolower(trim($condition[0])) === 'between') {
-                        $obj = $obj->whereBetween($key, $condition[1], $condition[2]);
-                    } elseif (strtolower(trim($condition[0])) === 'in') {
-                        $obj = $obj->whereIn($key, $condition[1], $condition[2]);
-                    } else {
-                        $obj = $obj->where($key, $condition[0], $condition[1], $condition[2]);
-                    }
-                } else {
-                    throw new \Exception("Invalid " . strtoupper($key) . " condition", 1);
-                }
+                $obj = self::getWhereFromArray($obj, $key, $condition);
             } else {
                 if (is_numeric($condition) || is_bool($condition)) {
                     $obj = $obj->where($key, $condition);
@@ -101,5 +69,45 @@ trait HasFilter
         }
 
         return $obj;
+    }
+
+    private static function newModelObj()
+    {
+        $model = static::class;
+        return new $model();
+    }
+
+    private static function getWhereFromArray($obj, $key, $condition)
+    {
+        $count = count($condition);
+        $whereType = strtolower(trim($condition[0]));
+
+        switch ($count) {
+            case 1:
+                return $obj->where($key, $condition[0]);
+
+            case 2:
+                switch ($whereType) {
+                    case 'between':
+                        return $obj->whereBetween($key, $condition[1]);
+                    case 'in':
+                        return $obj->whereIn($key, $condition[1]);
+                    default:
+                        return $obj->where($key, $condition[0], $condition[1]);
+                };
+
+            case 3:
+                switch ($whereType) {
+                    case 'between':
+                        return $obj->whereBetween($key, $condition[1], $condition[2]);
+                    case 'in':
+                        return $obj->whereIn($key, $condition[1], $condition[2]);
+                    default:
+                        return $obj->where($key, $condition[0], $condition[1], $condition[2]);
+                };
+
+            default:
+                throw new \Exception("Invalid " . strtoupper($key) . " condition", 1);
+        }
     }
 }

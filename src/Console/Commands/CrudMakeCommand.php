@@ -696,7 +696,7 @@ class CrudMakeCommand extends Command
         if ($this->apiLumen) {
             $template = file_get_contents(__DIR__ . '/stubs/api/' . $type . '.stub');
         } elseif ($this->webService) {
-            $template = $this->professional && in_array($type, ['controller', 'repository', 'service', 'request'])
+            $template = $this->professional && in_array($type, ['request', 'controller', 'service', 'repository'])
                             ? file_get_contents(__DIR__ . '/stubs/web-service/pro/' . $type . '.stub')
                             : file_get_contents(__DIR__ . '/stubs/web-service/' . $type . '.stub');
         } else {
@@ -1702,9 +1702,23 @@ class CrudMakeCommand extends Command
             $objMod = new \stdClass();
             $objMod->singular = 'model';
             $objMod->arqs = [
-                $type => str_replace('{{{namespace}}}',
+                $type => str_replace(
+                                    '{{{namespace}}}',
                                     trim(substr($this->pathModels,0,-1)),
-                                    $this->getTemplate('baseModel')),
+                                    $this->getTemplate('baseModel')
+                                ),
+                
+            ];
+
+            $this->createFile($type, $objMod);
+
+            $objMod->arqs = [
+                'modelAuth' => str_replace(
+                                    '{{{namespace}}}',
+                                    trim(substr($this->pathModels, 0, -1)),
+                                    $this->getTemplate('modelAuth')
+                                ),
+
             ];
 
             $this->createFile($type, $objMod);

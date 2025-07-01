@@ -16,6 +16,8 @@ class ServiceProvider extends BaseServiceProvider
     {
         $this->loadTranslations();
 
+        $this->publishModels();
+
         $this->publishRepositories();
         
         $this->publishServices();
@@ -37,7 +39,7 @@ class ServiceProvider extends BaseServiceProvider
 
         $this->publishes([
             $translationsPath => resource_path('lang/vendor/laravel-crud'),
-        ], 'translations');
+        ], 'laravel-crud-translations');
     }
 
     private function publishViews()
@@ -46,7 +48,16 @@ class ServiceProvider extends BaseServiceProvider
 
         $this->publishes([
             $layoutsPath => resource_path('views'),
-        ], 'views');
+        ], 'laravel-crud-views');
+    }
+
+    private function publishModels()
+    {
+        $modelsPath = $this->packagePath('app/Models/Traits');
+
+        $this->publishes([
+            $modelsPath => app_path('Models/Traits'),
+        ], 'laravel-crud-models-traits');
     }
 
     private function publishRepositories()
@@ -55,7 +66,7 @@ class ServiceProvider extends BaseServiceProvider
 
         $this->publishes([
             $repositoriesPath => app_path('Repositories'),
-        ], 'repositories');
+        ], 'laravel-crud-repositories');
     }
 
     private function publishServices()
@@ -64,7 +75,7 @@ class ServiceProvider extends BaseServiceProvider
 
         $this->publishes([
             $servicesPath => app_path('Services'),
-        ], 'services');
+        ], 'laravel-crud-services');
     }
 
     private function publishHelpers()
@@ -73,7 +84,7 @@ class ServiceProvider extends BaseServiceProvider
 
         $this->publishes([
             $helpersPath => app_path('Helpers'),
-        ], 'helpers');
+        ], 'laravel-crud-helpers');
     }
 
     private function publishConfig()
@@ -82,7 +93,7 @@ class ServiceProvider extends BaseServiceProvider
 
         $this->publishes([
             $configPath => config_path(),
-        ], 'config');
+        ], 'laravel-crud-config');
 
     }
 
