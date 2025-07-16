@@ -8,12 +8,12 @@ Route::prefix('{{{kebab_plural}}}')
         ->name('{{{kebab_plural}}}.')
         ->group(function () {
     Route::get('/', 'list')->name('list');
-    Route::post('/', 'list');
+    Route::post('/', 'list')->name('list');
     Route::get('plucks', 'plucks')->name('plucks');
-    Route::post('plucks', 'plucks');
+    Route::post('plucks', 'plucks')->name('plucks');
     Route::post('create', 'create')->name('create');
     Route::get('{id}', 'read')->name('read');
-    Route::post('{id}', 'read');
+    Route::post('{id}', 'read')->name('read');
     Route::put('{id}', 'update')->name('update');
     Route::delete('{id}', 'delete')->name('delete');
 });

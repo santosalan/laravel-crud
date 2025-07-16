@@ -6,20 +6,24 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Pluralizer;
 use Illuminate\Support\Str;
+use SantosAlan\LaravelCrud\DTOs\CrudOptions;
+use SantosAlan\LaravelCrud\Services\DatabaseAnalyzer;
+use SantosAlan\LaravelCrud\Services\OptionsProcessor;
+use SantosAlan\LaravelCrud\Services\RouteProcessor;
+use SantosAlan\LaravelCrud\Services\TemplateManager;
+use SantosAlan\LaravelCrud\Services\MarkProcessor;
+use SantosAlan\LaravelCrud\Services\FileGenerator;
+use SantosAlan\LaravelCrud\Services\FormFieldsProcessor;
 
 class CrudMakeCommand extends Command
 {
     /**
      * The console command name.
-     *
-     * @var string
      */
     protected $name = 'make:crud';
 
     /**
      * The name and signature of the console command.
-     *
-     * @var string
      */
     protected $signature = 'make:crud
                             {--t|table= : [all | table number] }
@@ -28,69 +32,155 @@ class CrudMakeCommand extends Command
                             {--a|api-client=N : [Y | N] (Api client to System Core generated with santosalan/lumen-crud)}
                             {--w|web-service=N : [Y | N] (REST Web Service)}
                             {--b|base-model=N : [Y | N] }
+                            {--i|pivot-models=N : [Y | N] (Generate models for pivot tables) }
                             {--P|professional=N : [Y | N] (Professional mode, generates with Requests, Services and Repositories)}
                             {--T|theme=1 : [1 = AdminLTE | 2 = Porto Admin] (Put the theme files in an exclusive folder inside public / vendor... If the theme is not free, an authorized copy of the theme is required... We will not deliver copies of themes that are not free. Any unauthorized copy is your complete responsibility.)}';
 
-
     /**
      * The console command description.
-     *
-     * @var string
      */
     protected $description = 'Create a CRUD, Web Service or API Client to SantosAlan/Lumen-CRUD';
 
-    /**
-     * The path of Models
-     *
-     * @var string
-     */
-    private $pathModels = 'App\\Models\\';
+    private RouteProcessor $routeProcessor;
+    private FileGenerator $fileGenerator;
 
-    /**
-     * [$routes description]
-     * @var boolean
-     */
-    private $routes = true;
-
-    /**
-     * [$apiLumen description]
-     * @var boolean
-     */
-    private $apiLumen = false;
-
-    /**
-     * [$webService description]
-     * @var boolean
-     */
-    private $webService = false;
-
-    /**
-     * [$professional description]
-     * @var boolean
-     */
-    private $professional = false;
-
-    /**
-     * [$theme 1=AdminLTE | 2=Porto Admin]
-     * @var integer
-     */
-    private $theme = 1;
-
-    /**
-     * [$tables description]
-     *
-     * @var [type]
-     */
-    private $tables = [];
+    private CrudOptions $options;
+    private array $tables = [];
+    private string $pathModels = 'App\\Models\\';
+    private bool $routes = true;
+    private bool $apiLumen = false;
+    private bool $webService = false;
+    private bool $baseModel = false;
+    private bool $pivotModels = false;
+    private bool $professional = false;
+    private int $theme = 1;
 
     /**
      * Create a new command instance.
-     *
-     * @return void
      */
-    public function __construct()
+    public function __construct(
+        private DatabaseAnalyzer $databaseAnalyzer = new DatabaseAnalyzer(),
+        private OptionsProcessor $optionsProcessor = new OptionsProcessor(),
+        private TemplateManager $templateManager = new TemplateManager(),
+        private MarkProcessor $markProcessor = new MarkProcessor(),
+        private FormFieldsProcessor $formFieldsProcessor = new FormFieldsProcessor()
+    )
     {
         parent::__construct();
+        $this->routeProcessor = new RouteProcessor($this->templateManager, $this->markProcessor);
+        $this->fileGenerator = new FileGenerator(
+                                        $this->templateManager,
+                                        $this->pathModels,
+                                        $this->webService,
+                                        $this->professional,
+                                        $this->baseModel
+                                    );
+    }
+
+    /**
+     * Execute the console command.
+     */
+    public function handle(): void
+    {
+        $this->processOptions();
+        $this->processTables();
+
+        if (empty(trim($this->options->table))) {
+            $this->info("\n\nNo table specified. Use the -t|--table option to specify which table to process.");
+            return;
+        }
+
+        $this->generateFiles();
+        
+    }
+
+    private function processOptions(): void
+    {
+        $this->options = CrudOptions::fromArray($this->options());
+    
+        $this->routes = $this->optionsProcessor->processRoutes($this->options);
+        $this->apiLumen = $this->optionsProcessor->processApiClient($this->options);
+        $this->webService = $this->optionsProcessor->processWebService($this->options);
+        $this->baseModel = $this->optionsProcessor->processBaseModel($this->options);
+        $this->pivotModels = $this->optionsProcessor->processPivotModels($this->options);
+        $this->professional = $this->optionsProcessor->processProfessional($this->options);
+        $this->theme = $this->optionsProcessor->processTheme($this->options);
+        $this->pathModels = $this->optionsProcessor->processPathModels($this->options);
+
+    }
+
+    private function processTables(): void
+    {
+        $this->tables = $this->databaseAnalyzer->getTables();
+        
+        if (empty(trim($this->options->table))) {
+            $this->displayAvailableTables();
+            return;
+        }
+
+        foreach ($this->tables as $tableKey => $table) {
+            $this->databaseAnalyzer->readTableFields($table);
+        }
+        
+        // Process marks for each table
+        foreach ($this->tables as $table) {
+            $table->marks = $this->markProcessor->processMarks($table, $this->pathModels);
+        }
+
+    }
+
+    private function displayAvailableTables(): void
+    {
+        $this->alert('TABLES');
+        foreach ($this->tables as $tableKey => $table) {
+            $this->info($tableKey . '->' . $table->name);
+        }
+    }
+
+    private function processRoutes(): void
+    {
+        if (!$this->routes) {
+            return;
+        }
+
+        $this->alert('ROUTES PROCESS');
+        $this->routeProcessor->processRoutes(
+            $this->tables,
+            $this->options,
+            $this->webService
+        );
+    }
+
+    private function generateFiles(): void
+    {
+        $this->info("\nProcessing tables...");
+        foreach ($this->tables as $table) {
+            if (!$this->shouldSkipTable($table)) {
+                $this->info("\nGenerating CRUD for table: {$table->name}");
+                $this->generateTableCrud($table);
+            }
+        }   
+    }
+
+    private function generateTableCrud(): void
+    {
+
+        $this->alert('GENERATING FILES');
+
+        $this->fileGenerator = new FileGenerator(
+            $this->templateManager,
+            $this->pathModels,
+            $this->webService,
+            $this->professional,
+            $this->baseModel
+        );
+
+        $this->fileGenerator->generateFiles($this->tables, $this->options->table);
+
+        // Process routes if enabled
+        if ($this->routes) {
+            $this->processRoutes();
+        }
     }
 
     /**
@@ -112,67 +202,67 @@ class CrudMakeCommand extends Command
      * [processRoutes description]
      * @return [type] [description]
      */
-    public function processRoutes()
-    {
-        if ($this->routes) {
+    // public function processRoutes()
+    // {
+    //     if ($this->routes) {
 
-            $template = $this->getTemplate('routes');
-            $routes = '';
-
-
-            if (trim($this->option('table')) === 'all') {
-
-                foreach ($this->tables as $table) {
-                    if ($table->relationTable) {
-                        continue;
-                    }
-
-                    $m = [
-                        'plural_uc' => ucwords($table->plural),
-                        'plural' => $table->plural,
-                        'kebab_plural' => Str::kebab($table->plural),
-                    ];
-
-                    $temp = $template;
-
-                    foreach ($this->marks()['routes'] as $mark){
-                        $temp = str_replace('{{{' . $mark . '}}}', trim($m[$mark]), $temp);
-                    }
-
-                    $routes .= $temp;
-                }
+    //         $template = $this->getTemplate('routes');
+    //         $routes = '';
 
 
-            } elseif (trim($this->option('table')) !== '') {
+    //         if (trim($this->option('table')) === 'all') {
 
-                $tableKey = $this->option('table');
+    //             foreach ($this->tables as $table) {
+    //                 if ($table->relationTable) {
+    //                     continue;
+    //                 }
 
-                $table = $this->tables[$tableKey];
+    //                 $m = [
+    //                     'plural_uc' => ucwords($table->plural),
+    //                     'plural' => $table->plural,
+    //                     'kebab_plural' => Str::kebab($table->plural),
+    //                 ];
 
-                $m = [
-                    'plural_uc' => ucwords($table->plural),
-                    'plural' => $table->plural,
-                    'kebab_plural' => Str::kebab($table->plural),
-                ];
+    //                 $temp = $template;
 
-                $temp = $template;
+    //                 foreach ($this->marks()['routes'] as $mark){
+    //                     $temp = str_replace('{{{'. $mark .'}}}', trim($m[$mark]), $temp);
+    //                 }
 
-                foreach ($this->marks()['routes'] as $mark){
-                    $temp = str_replace('{{{' . $mark . '}}}', trim($m[$mark]), $temp);
-                }
+    //                 $routes .= $temp;
+    //             }
 
-                $routes = $temp;
 
-            }
+    //         } elseif (trim($this->option('table')) !== '') {
 
-            $fileRoutes = $this->webService 
-                            ? fopen(base_path() . '/routes/api.php', 'a+') 
-                            : fopen(base_path() . '/routes/web.php', 'a+');
+    //             $tableKey = $this->option('table');
 
-            fwrite($fileRoutes, $routes);
-            fclose($fileRoutes);
-        }
-    }
+    //             $table = $this->tables[$tableKey];
+
+    //             $m = [
+    //                 'plural_uc' => ucwords($table->plural),
+    //                 'plural' => $table->plural,
+    //                 'kebab_plural' => Str::kebab($table->plural),
+    //             ];
+
+    //             $temp = $template;
+
+    //             foreach ($this->marks()['routes'] as $mark){
+    //                 $temp = str_replace('{{{'. $mark .'}}}', trim($m[$mark]), $temp);
+    //             }
+
+    //             $routes = $temp;
+
+    //         }
+
+    //         $fileRoutes = $this->webService 
+    //                         ? fopen(base_path() . '/routes/api.php', 'a+') 
+    //                         : fopen(base_path() . '/routes/web.php', 'a+');
+
+    //         fwrite($fileRoutes, $routes);
+    //         fclose($fileRoutes);
+    //     }
+    // }
 
     /**
      * [processOptionPathModels description]
@@ -601,18 +691,12 @@ class CrudMakeCommand extends Command
             case 'time':
             case 'timestamp':
             case 'integer':
-                    $filter = "'" . $objField->name . "' => isset(\$r['" . $objField->name . "']) ? \$r['" . $objField->name . "'] : null,
-                '" . $objField->name . "-options' => isset(\$r['" . $objField->name . "-options']) ? \$r['" . $objField->name . "-options'] : null,
-                '" . $objField->name . "-1' => isset(\$r['" . $objField->name . "-1'])
-                                        ? \$r['" . $objField->name . "-1']
-                                        : (isset(\$r['" . $objField->name . "-2'])
-                                                ? \$r['" . $objField->name . "-2']
-                                                : null),
-                '" . $objField->name . "-2' => isset(\$r['" . $objField->name . "-2'])
-                                        ? \$r['" . $objField->name . "-2']
-                                        : (isset(\$r['" . $objField->name . "-1'])
-                                                ? \$r['" . $objField->name . "-1']
-                                                : null)";
+                $filter = implode(",\n", [
+                    "'" . $objField->name . "' => isset(\$r['" . $objField->name . "']) ? \$r['" . $objField->name . "'] : null",
+                    "'" . $objField->name . "-options' => isset(\$r['" . $objField->name . "-options']) ? \$r['" . $objField->name . "-options'] : null",
+                    "'" . $objField->name . "-1' => isset(\$r['" . $objField->name . "-1']) ? \$r['" . $objField->name . "-1'] : (isset(\$r['" . $objField->name . "-2']) ? \$r['" . $objField->name . "-2'] : null)",
+                    "'" . $objField->name . "-2' => isset(\$r['" . $objField->name . "-2']) ? \$r['" . $objField->name . "-2'] : (isset(\$r['" . $objField->name . "-1']) ? \$r['" . $objField->name . "-1'] : null)"
+                ]);
                     break;
 
 
@@ -693,6 +777,8 @@ class CrudMakeCommand extends Command
      */
     public function getTemplate($type)
     {
+        $template = false;
+        
         if ($this->apiLumen) {
             $template = file_get_contents(__DIR__ . '/stubs/api/' . $type . '.stub');
         } elseif ($this->webService) {
@@ -717,7 +803,7 @@ class CrudMakeCommand extends Command
             die;
         }
 
-       return $template;
+        return $template;
     }
 
     public function getPkDisplay($objTable)
@@ -864,7 +950,7 @@ class CrudMakeCommand extends Command
                                 . ",\n";
                     } else {
                         $plucks .= "                '" . $t->plural . "' => "
-                                . ucwords($t->singular) . "::pluck('" . $display . "', '" . $pk . "')"
+                                . ucwords($t->singular) . "::pluck('" . $display . ', "' . $pk . "')"
                                 . ",\n";
                     }
                 }
@@ -1278,77 +1364,7 @@ class CrudMakeCommand extends Command
 
         // FORM FIELDS
         $prepareFormFields = function () use ($objTable) {
-            $fields = null;
-
-            foreach ($objTable->fields as $field) {
-                if (! in_array($field->name, ['id',  'updated_at', 'created_at', 'deleted_at', 'remember_token'])) {
-
-                    if ($field->fk) {
-                        foreach ($this->tables as $t) {
-                            if ($t->name === $field->fk) {
-                                $fields .= '
-                    <div class="col-xs-12 col-12 mb-3">
-                        {{ Form::label("' . $field->name . '", "' . Str::title(str_replace('_',' ',$t->singular)) . '", ["class" => "control-label"]) }}
-                        {{ Form::select("' . $field->name . '", $plucks["' . $t->plural . '"], @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => ""' . ( $field->required ? ', "required"' : '' ) . ']) }}
-                    </div>' . "\n";
-
-                            }
-                        }
-                    } elseif ($field->type === 'date') {
-                        $fields .= '
-                    <div class="col-xs-12 col-12 mb-3">
-                        {{ Form::label("' . $field->name . '", "' . Str::title(str_replace('_', ' ', $field->name)) . '", ["class" => "control-label"]) }}
-                        {{ Form::date("' . $field->name . '", @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => "' . Str::title(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
-                    </div>' . "\n";
-
-                    } elseif (in_array($field->type, ['datetime', 'timestamp'])) {
-                        $fields .= '
-                    <div class="col-xs-12 col-12 mb-3">
-                        {{ Form::label("' . $field->name . '", "' . Str::title(str_replace('_', ' ', $field->name)) . '", ["class" => "control-label"]) }}
-                        {{ Form::datetime("' . $field->name . '", @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => "' . Str::title(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
-                    </div>' . "\n";
-
-                    } elseif ($field->type === 'int') {
-                        $fields .= '
-                    <div class="col-xs-12 col-12 mb-3">
-                        {{ Form::label("' . $field->name . '", "' . Str::title(str_replace('_', ' ', $field->name)) . '", ["class" => "control-label"]) }}
-                        {{ Form::number("' . $field->name . '", @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => "' . Str::title(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
-                    </div>' . "\n";
-
-                    } elseif ($field->name === 'email') {
-                        $fields .= '
-                    <div class="col-xs-12 col-12 mb-3">
-                        {{ Form::label("' . $field->name . '", trans(\'laravel-crud::view.email\'), ["class" => "control-label"]) }}
-                        {{ Form::email("' . $field->name . '", @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => trans(\'laravel-crud::view.email\')' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
-                    </div>' . "\n";
-
-                    } elseif ($field->name === 'password') {
-
-                        $fields .= '
-                    @if (Request::is(\'*/create\'))
-                    <div class="col-xs-12 col-12 mb-3">
-                        {{ Form::label("' . $field->name . '", trans(\'laravel-crud::view.password\'), ["class" => "control-label"]) }}
-                        {{ Form::password("' . $field->name . '", ["class" => "form-control", "placeholder" => trans(\'laravel-crud::view.password\')' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
-                    </div>
-                    @endif' . "\n";
-
-                    } elseif (in_array($field->name, ['name', 'title', 'user', 'username', 'login'])) {
-                        $fields .= '
-                    <div class="col-xs-12 col-12 mb-3">
-                        {{ Form::label("' . $field->name . '", trans(\'laravel-crud::view.' . $field->name . '\'), ["class" => "control-label"]) }}
-                        {{ Form::text("' . $field->name . '", @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => trans(\'laravel-crud::view.' . $field->name . '\')' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
-                    </div>' . "\n";
-                    } else {
-                        $fields .= '
-                    <div class="col-xs-12 col-12 mb-3">
-                        {{ Form::label("' . $field->name . '", "' . Str::title(str_replace('_', ' ', $field->name)) . '", ["class" => "control-label"]) }}
-                        {{ Form::text("' . $field->name . '", @$' . $objTable->singular . '->' . $field->name .', ["class" => "form-control", "placeholder" => "' . Str::title(str_replace('_', ' ', $field->name)) . '"' . ( $field->size ? ', "maxlength" => "' . $field->size . '"' : '' ) . ( $field->required ? ', "required"' : '' ) . ']) }}
-                    </div>' . "\n";
-                    }
-                }
-            }
-
-            return $fields;
+            return $this->formFieldsProcessor->generateFormFields($objTable, $this->tables);
         };
 
         // DISPLAY FIELDS
@@ -1841,67 +1857,37 @@ class CrudMakeCommand extends Command
         fclose($file);
     }
 
-
-    /**
-     * Execute the console command.
-     *
-     * @return mixed
-     */
-    public function handle()
+    private function shouldSkipTable($table): bool
     {
-
-        // Process Theme
-        $this->processOptionTheme();
-
-        // Process Api Client
-        $this->processOptionApiClient();
-
-        // Process Web Server
-        $this->processOptionWebService();
-
-        // Process Professional
-        $this->processOptionProfessional();
-
-        // Process Routes
-        $this->processOptionRoutes();
-
-        // Process Path Models
-        $this->processOptionPathModels();
-
-        // Process Table
-        $this->processOptionTable();
-
-        // Process Controller
-        $this->processFile('controller');   
-
-        // Process Model
-        $this->processFile('model');
-
-        if ($this->webService && $this->professional) {
-            // Process Request
-            $this->processFile('request');
-
-            // Process Service
-            $this->processFile('service');
-
-            // Process Repository
-            $this->processFile('repository');
+        // Skip pivot/relation tables unless pivot models are enabled
+        if ($table->relationTable && !$this->pivotModels) {
+            return true;
         }
 
-        if (!$this->webService) {
-            // Process Index
-            $this->processFile('index.blade');
+        // Skip system tables
+        $systemTables = [
+            'migrations',
+            'password_resets',
+            'failed_jobs',
+            'password_reset_tokens',
+            'personal_access_tokens',
+            'jobs',
+            'job_batches',
+            'cache',
+            'cache_locks',
+            'sessions'
+        ];
 
-            // Process Form
-            $this->processFile('form.blade');
-
-            // Process Show
-            $this->processFile('show.blade');
+        if (in_array($table->name, $systemTables)) {
+            return true;
         }
 
-        // Process Routes
-        $this->processRoutes();
+        // If a specific table was requested, skip all others
+        if (!empty(trim($this->options->table)) && $this->options->table !== 'all') {
+            return $this->tables[$this->options->table]->name != $table->name;
+        }
 
-
+        return false;
     }
+
 }
