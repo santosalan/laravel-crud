@@ -13,19 +13,16 @@ use Illuminate\Http\JsonResponse;
 class {{{plural_uc}}}Controller extends Controller
 {
 
-    protected ${{{singular}}}Service;
-
     /**
      * Create a new controller instance.
      *
      * @param  {{{singular_uc}}}Service ${{{singular}}}Service
      * @return void
      */
-    public function __construct({{{singular_uc}}}Service ${{{singular}}}Service)
-    {
-
-        $this->{{{singular}}}Service = ${{{singular}}}Service;
-
+    public function __construct(
+        protected {{{singular_uc}}}Service ${{{singular}}}Service
+    ) {
+        //
     }
 
     /**
@@ -37,11 +34,11 @@ class {{{plural_uc}}}Controller extends Controller
     public function plucks({{{singular_uc}}}Request $request): JsonResponse
     {
         $plucks = $this->{{{singular}}}Service->plucks();
-        
+
         return ResponseHelper::success(
-                                    'plucks', 
+                                    'plucks',
                                     [
-                                        'request' => $request->all(), 
+                                        'request' => $request->all(),
                                         'plucks' => $plucks
                                     ]
                                 );
@@ -61,18 +58,18 @@ class {{{plural_uc}}}Controller extends Controller
             ${{{plural}}} = $this->{{{singular}}}Service->list($request->all());
 
             $response = ResponseHelper::success(
-                                            'list', 
+                                            'list',
                                             [
-                                                'request' => $request->all(), 
+                                                'request' => $request->all(),
                                                 '{{{plural}}}' => ${{{plural}}}
                                             ]
                                         );
 
         } catch(\Exception $e) {
             $response = ResponseHelper::error(
-                                            'list', 
+                                            'list',
                                             [
-                                                'request' => $request->all(), 
+                                                'request' => $request->all(),
                                                 'errors' => $e->getMessage()
                                             ]
                                         );
@@ -94,7 +91,7 @@ class {{{plural_uc}}}Controller extends Controller
             ${{{singular}}} = $this->{{{singular}}}Service->create($request->all());
 
             $response = ResponseHelper::success(
-                                            'create', 
+                                            'create',
                                             [
                                                 '{{{singular}}}' => ${{{singular}}}->relationships(),
                                             ]
@@ -132,7 +129,7 @@ class {{{plural_uc}}}Controller extends Controller
                                                 '{{{singular}}}' => ${{{singular}}}->relationships(),
                                             ]
                                         );
-        
+
         } catch(ModelNotFoundException $e) {
             $response = ResponseHelper::notFound(
                                             'read',
@@ -141,9 +138,9 @@ class {{{plural_uc}}}Controller extends Controller
                                                 'errors' => ['{{{singular}}}' => ['Not found']],
                                             ],
                                         );
-         
+
         } catch(\Exception $e) {
-            
+
             $response = ResponseHelper::error(
                                             'read',
                                             [
@@ -195,7 +192,7 @@ class {{{plural_uc}}}Controller extends Controller
                                                 'errors' => $e->getMessage(),
                                             ]
                                         );
-                                        
+
         }
 
         return $response;
@@ -211,7 +208,7 @@ class {{{plural_uc}}}Controller extends Controller
     public function delete($id, {{{singular_uc}}}Request $request): JsonResponse
     {
         try {
-            
+
             ${{{singular}}} = $this->{{{singular}}}Service->delete($id);
 
             $response = ResponseHelper::success(

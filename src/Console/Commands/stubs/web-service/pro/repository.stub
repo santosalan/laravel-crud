@@ -9,17 +9,28 @@ use Illuminate\Database\Eloquent\Collection;
 
 interface {{{singular_uc}}}RepositoryInterface extends RepositoryInterface
 {
+    public function newObject(): {{{singular_uc}}};
     public function plucks(): array;
     public function all(): Collection;
-    public function filter(array $filters): LengthAwarePaginator;
+    public function filter(array $filters, ?Builder ${{{singular}}} = null): LengthAwarePaginator;
     public function create(array $data): {{{singular_uc}}};
     public function find($id): ?{{{singular_uc}}};
     public function update($id, array $data): {{{singular_uc}}};
     public function delete($id): {{{singular_uc}}};
 }
 
-class {{{singular_uc}}}Repository implements RepositoryInterface
+class {{{singular_uc}}}Repository implements {{{singular_uc}}}RepositoryInterface
 {
+    /**
+     * Create a new {{{singular}}} instance.
+     *
+     * @return {{{singular_uc}}}
+     */
+    public function newObject(): {{{singular_uc}}}
+    {
+        return new {{{singular_uc}}}();
+    }
+
     /**
      * Get plucks for {{{plural}}}.
      *
@@ -46,7 +57,7 @@ class {{{singular_uc}}}Repository implements RepositoryInterface
      * @param array $filters
      * @return LengthAwarePaginator
      */
-    public function filter(array $filters): LengthAwarePaginator
+    public function filter(array $filters, ?Builder ${{{singular}}} = null): LengthAwarePaginator
     {
         return {{{singular_uc}}}::filter($filters);
     }

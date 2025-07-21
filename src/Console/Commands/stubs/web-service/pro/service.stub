@@ -6,11 +6,11 @@ use App\Repositories\{{{singular_uc}}}Repository;
 
 class {{{singular_uc}}}Service
 {
-    protected ${{{singular}}}Repository;
 
-    public function __construct({{{singular_uc}}}Repository ${{{singular}}}Repository)
-    {
-        $this->{{{singular}}}Repository = ${{{singular}}}Repository;
+    public function __construct(
+        protected {{{singular_uc}}}Repository ${{{singular}}}Repository
+    ) {
+        //
     }
 
     public function plucks()
@@ -28,9 +28,13 @@ class {{{singular_uc}}}Service
         return $this->{{{singular}}}Repository->create($data);
     }
 
-    public function read($id)
+    public function read($id, array $filters = [])
     {
-        return $this->{{{singular}}}Repository->find($id);
+        ${{{singular}}} = $this->{{{singular}}}Repository->newObject();
+        ${{{singular}}} = ${{{singular}}}->whereId($id);
+        return ($this->{{{singular}}}Repository
+                ->filter($filters, ${{{singular}}})
+                ->first()) ?? null;
     }
 
     public function update($id, array $data)
