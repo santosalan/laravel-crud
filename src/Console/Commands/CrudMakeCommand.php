@@ -1710,8 +1710,12 @@ class CrudMakeCommand extends Command
                 
             ];
 
+            // dd($objMod->arqs[$type]);
+
             $this->createFile($type, $objMod);
 
+            $objMod = new \stdClass();
+            $objMod->singular = 'modelAuth';
             $objMod->arqs = [
                 'modelAuth' => str_replace(
                                     '{{{namespace}}}',
@@ -1721,7 +1725,7 @@ class CrudMakeCommand extends Command
 
             ];
 
-            $this->createFile($type, $objMod);
+            $this->createFile('modelAuth', $objMod);
         }
 
         foreach ($this->tables as $key => $table) {
@@ -1774,6 +1778,7 @@ class CrudMakeCommand extends Command
                             ? [
                                 'controller' => app_path() . '/Http/Controllers/Api/',
                                 'model' => app_path() . '/' . implode('/',$pathModels),
+                                'modelAuth' => app_path() . '/' . implode('/', $pathModels),
                                 'request' => app_path() . '/Http/Requests/',
                                 'service' => app_path() . '/Services/',
                                 'repository' => app_path() . '/Repositories/',
@@ -1781,6 +1786,7 @@ class CrudMakeCommand extends Command
                             : [
                                 'controller' => app_path() . '/Http/Controllers/',
                                 'model' => app_path() . '/' . implode('/',$pathModels),
+                                'modelAuth' => app_path() . '/' . implode('/', $pathModels),
                                 'index.blade' => resource_path() . '/views/' . Str::kebab($objTable->plural) . '/',
                                 'form.blade' => resource_path() . '/views/' . Str::kebab($objTable->plural) . '/' ,
                                 'show.blade' => resource_path() . '/views/' . Str::kebab($objTable->plural) . '/' ,
@@ -1817,6 +1823,10 @@ class CrudMakeCommand extends Command
                     $nameArq = ucwords($objTable->singular) . '.php';
                     break;
 
+                case 'modelAuth':
+                    $nameArq = ucwords($objTable->singular) . '.php';
+                    break;
+
                 default:
                     $nameArq = $t . '.php';
             }
@@ -1824,6 +1834,7 @@ class CrudMakeCommand extends Command
             return $nameArq;
         };
 
+        
         @mkdir($paths[$type]);
         $file = fopen($paths[$type] . $prepareNameArq($type), 'w');
         fwrite($file, $objTable->arqs[$type]);
