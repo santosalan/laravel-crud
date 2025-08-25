@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\{{{singular_uc}}};
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Repositories\Interfaces\RepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
@@ -59,7 +60,7 @@ class {{{singular_uc}}}Repository implements {{{singular_uc}}}RepositoryInterfac
      */
     public function filter(array $filters, ?Builder ${{{singular}}} = null): LengthAwarePaginator
     {
-        return {{{singular_uc}}}::filter($filters);
+        return {{{singular_uc}}}::filter($filters, ${{{singular}}});
     }
 
     /**
