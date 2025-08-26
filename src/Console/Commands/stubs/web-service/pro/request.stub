@@ -2,32 +2,19 @@
 
 namespace App\Http\Requests;
 
-use App\Helpers\ResponseHelper;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Support\Facades\Config;
+use App\Http\Requests\Request;
 
-class {{{singular_uc}}}Request extends FormRequest
+class {{{singular_uc}}}Request extends Request
 {
-    /**
-     * Determine if the {{{singular}}} is authorized to make this request.
-     *
-     * @return bool
-     */
-    public function authorize(): bool
-    {
-        return true; // all requests are authorized by default
-    }
 
     /**
      * Validation rules for the request.
-     * 
+     *
      * @return array
      */
     public function rules(): array
     {
-        if ($this->isMethod('post')) {
+        if ($this->isMethod('post') && $this->validateAction('create')) {
             return [
                 {{{validators}}}
             ];
@@ -43,22 +30,6 @@ class {{{singular_uc}}}Request extends FormRequest
 
         // Para GET, DELETE, etc., nenhuma validação obrigatória
         return [];
-    }
-
-    /**
-     * Custom error messages for validation. 
-     *
-     * @return array
-     */
-    public function messages(): array
-    {
-        return [
-        
-            // Carrega mensagens de validação adicionais do arquivo de configuração
-            ...Config::get('laravel-crud.validation.messages', []), 
-
-        ];
-
     }
 
     /**
@@ -82,25 +53,4 @@ class {{{singular_uc}}}Request extends FormRequest
         ];
     }
 
-
-    /**
-     * Handle the validation failure.
-     *
-     * @param  \Illuminate\Contracts\Validation\Validator  $validator
-     * @return void
-     *
-     * @throws \Illuminate\Http\Exceptions\HttpResponseException
-     */
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(
-            ResponseHelper::error(
-                last(explode('.', $this->route()->getName())),
-                [   
-                    'request' => $this->all(),
-                    'errors' => $validator->errors()->all()
-                ]
-            )
-        );
-    }
 }

@@ -16,10 +16,12 @@ class ServiceProvider extends BaseServiceProvider
     {
         $this->loadTranslations();
 
+        $this->publishRequests();
+
         $this->publishModels();
 
         $this->publishRepositories();
-        
+
         $this->publishServices();
 
         $this->publishHelpers();
@@ -49,6 +51,15 @@ class ServiceProvider extends BaseServiceProvider
         $this->publishes([
             $layoutsPath => resource_path('views'),
         ], 'laravel-crud-views');
+    }
+
+    private function publishRequests()
+    {
+        $requestsPath = $this->packagePath('app/Http/Requests');
+
+        $this->publishes([
+            $requestsPath => app_path('Http/Requests'),
+        ], 'laravel-crud-requests');
     }
 
     private function publishModels()
@@ -94,17 +105,15 @@ class ServiceProvider extends BaseServiceProvider
         $this->publishes([
             $configPath => config_path(),
         ], 'laravel-crud-config');
-
     }
 
     private function packagePath($path)
     {
-        return __DIR__."/../$path";
+        return __DIR__ . "/../$path";
     }
 
     private function registerCommands()
     {
         $this->commands(CrudMakeCommand::class);
     }
-
 }
