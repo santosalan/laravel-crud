@@ -119,8 +119,8 @@ class {{{plural_uc}}}Controller extends Controller
      */
     public function read($id, {{{singular_uc}}}Request $request): JsonResponse
     {
-        try{
-            ${{{singular}}} = $this->{{{singular}}}Service->read($id);
+        try {
+            ${{{singular}}} = $this->{{{singular}}}Service->read($id, $request->all());
 
             $response = ResponseHelper::success(
                                             'read',
@@ -135,7 +135,7 @@ class {{{plural_uc}}}Controller extends Controller
                                             'read',
                                             [
                                                 'request' => $request->all(),
-                                                'errors' => ['{{{singular}}}' => ['Not found']],
+                                                'errors' => ['{{{singular}}}' => [config('laravel-crud.system.messages.not_found')]],
                                             ],
                                         );
 
@@ -180,7 +180,7 @@ class {{{plural_uc}}}Controller extends Controller
                                             'update',
                                             [
                                                 'request' => $request->all(),
-                                                'errors' => ['{{{singular}}}' => ['Not found']],
+                                                'errors' => ['{{{singular}}}' => [config('laravel-crud.system.messages.not_found')]],
                                             ]
                                         );
 
@@ -225,7 +225,7 @@ class {{{plural_uc}}}Controller extends Controller
                                             'delete',
                                             [
                                                 'request' => $request->all(),
-                                                'errors' => ['{{{singular}}}' => ['Not found']],
+                                                'errors' => ['{{{singular}}}' => [config('laravel-crud.system.messages.not_found')]],
                                             ]
                                         );
 

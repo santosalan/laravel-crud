@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Repositories\{{{singular_uc}}}Repository;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class {{{singular_uc}}}Service
 {
@@ -32,9 +33,11 @@ class {{{singular_uc}}}Service
     {
         ${{{singular}}} = $this->{{{singular}}}Repository->newObject();
         ${{{singular}}} = ${{{singular}}}->whereId($id);
-        return ($this->{{{singular}}}Repository
+        ${{{singular}}} = $this->{{{singular}}}Repository
                 ->filter($filters, ${{{singular}}})
-                ->first()) ?? null;
+                ->first();
+
+        return ${{{singular}}} ?? throw new ModelNotFoundException();
     }
 
     public function update($id, array $data)
